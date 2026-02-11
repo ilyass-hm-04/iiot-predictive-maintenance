@@ -4,15 +4,17 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { 
-  ArrowRight, 
-  Database, 
-  AlertTriangle, 
-  TrendingUp, 
+import {
+  ArrowRight,
+  Database,
+  AlertTriangle,
+  TrendingUp,
   Activity,
   Zap,
-  Shield
+  Shield,
+  MessageSquare
 } from 'lucide-react'
+import { ChatInterface } from '@/components/ChatInterface'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -89,7 +91,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Quick Stats */}
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
       >
@@ -215,6 +217,22 @@ export default function DashboardPage() {
               </div>
             </div>
           </Link>
+        </div>
+      </motion.div>
+
+      {/* AI Assistant Section */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white flex items-center gap-2">
+            <MessageSquare className="w-6 h-6 text-emerald-500" />
+            AI Assistant
+          </h2>
+          <p className="text-zinc-400 mb-4">
+            Chat with your AI maintenance assistant. You can upload manual PDFs or ask questions about equipment status.
+          </p>
+        </div>
+        <div className="lg:col-span-2">
+          <ChatInterface />
         </div>
       </motion.div>
     </motion.div>

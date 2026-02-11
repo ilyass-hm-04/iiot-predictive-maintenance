@@ -235,3 +235,61 @@ class DatasetUploadSection:
             messagebox.showwarning("No File", "Please select a CSV file first")
             return
         self.upload_callback(self.selected_file)
+
+
+class KnowledgeBaseSection:
+    """Knowledge Base Management Section"""
+    
+    def __init__(self, parent, upload_callback):
+        self.card = Card(parent, "📚 Knowledge Base")
+        self.upload_callback = upload_callback
+        
+        # Info text
+        info_frame = ttk.Frame(self.card.content, style='Card.TFrame')
+        info_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        ttk.Label(
+            info_frame,
+            text="Upload technical manuals (PDF) to train the AI Assistant.",
+            font=FONTS['body'],
+            wraplength=300
+        ).pack(anchor=tk.W)
+        
+        # Status area
+        self.status_text = tk.Text(
+            self.card.content,
+            height=6,
+            width=40,
+            state='disabled',
+            font=FONTS['small'],
+            bg=COLORS['bg_dark'],
+            bd=0,
+            padx=10,
+            pady=10
+        )
+        self.status_text.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+        
+        # Upload button
+        ttk.Button(
+            self.card.content, 
+            text="📄 Upload Manual (PDF)", 
+            style='Primary.TButton',
+            command=self.upload_document
+        ).pack(fill=tk.X)
+        
+    def upload_document(self):
+        """Handle upload button"""
+        filename = filedialog.askopenfilename(
+            title="Select PDF Document",
+            filetypes=[("PDF files", "*.pdf")]
+        )
+        if filename:
+            self.upload_callback(filename)
+
+    def log_message(self, message):
+        """Append message to status log"""
+        self.status_text.configure(state='normal')
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.status_text.insert(tk.END, f"[{timestamp}] {message}\n")
+        self.status_text.see(tk.END)
+        self.status_text.configure(state='disabled')

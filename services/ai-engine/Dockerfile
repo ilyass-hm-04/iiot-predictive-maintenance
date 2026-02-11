@@ -22,7 +22,7 @@ COPY requirements-base.txt requirements-app.txt ./
 
 # Use BuildKit cache mount for pip - MASSIVE speedup
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-compile -r requirements-base.txt -r requirements-app.txt
+    pip install --default-timeout=1000 --no-compile -r requirements-base.txt -r requirements-app.txt
 
 # Final runtime stage
 FROM base

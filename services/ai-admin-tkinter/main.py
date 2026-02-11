@@ -16,7 +16,9 @@ from components import (
     ModelStatusSection,
     QuickActionsSection,
     TrainingConfigSection,
-    DatasetUploadSection
+    TrainingConfigSection,
+    DatasetUploadSection,
+    KnowledgeBaseSection
 )
 from api_client import AIEngineClient
 
@@ -161,6 +163,14 @@ class AIAdminDashboard:
         )
         self.quick_actions.card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
         
+        self.quick_actions.card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        
+        self.kb_section = KnowledgeBaseSection(
+            left, 
+            self._upload_kb_doc
+        )
+        self.kb_section.card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        
         # Right column
         right = ttk.Frame(self.content_frame)
         right.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 0))
@@ -194,6 +204,14 @@ class AIAdminDashboard:
             self.reset_model
         )
         self.quick_actions.card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        
+        self.quick_actions.card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        
+        self.kb_section = KnowledgeBaseSection(
+            column, 
+            self._upload_kb_doc
+        )
+        self.kb_section.card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
         
         self.training_config = TrainingConfigSection(column, self.train_model)
         self.training_config.card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
@@ -277,6 +295,24 @@ class AIAdminDashboard:
         
         self.api.upload_dataset(file_path, on_success, on_error)
     
+        self.api.upload_dataset(file_path, on_success, on_error)
+    
+    def _upload_kb_doc(self, file_path: str):
+        """Upload document for knowledge base"""
+        self._update_status(f"Uploading {file_path}...")
+        self.kb_section.log_message(f"Uploading {file_path}...")
+        
+        def on_success(response):
+            msg = response.get('message', 'Upload successful')
+            self.root.after(0, lambda: self.kb_section.log_message(f"✓ {msg}"))
+            self.root.after(0, lambda: self._update_status("✓ Document uploaded"))
+        
+        def on_error(error):
+            self.root.after(0, lambda: self.kb_section.log_message(f"✗ Upload failed: {error}"))
+            self.root.after(0, lambda: self._update_status(f"✗ Upload failed: {error}"))
+            
+        self.api.upload_document(file_path, on_success, on_error)
+
     def _update_status(self, message: str):
         """Update footer status message"""
         self.status_var.set(message)

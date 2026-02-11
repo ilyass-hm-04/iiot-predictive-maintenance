@@ -20,7 +20,7 @@ class AIEngineClient:
         def fetch():
             try:
                 response = requests.get(
-                    f"{self.base_url}/model-info",
+                    f"{self.base_url}/api/model-info",
                     timeout=API_TIMEOUT
                 )
                 response.raise_for_status()
@@ -36,7 +36,7 @@ class AIEngineClient:
         def train():
             try:
                 response = requests.post(
-                    f"{self.base_url}/train",
+                    f"{self.base_url}/api/train",
                     json=params,
                     timeout=120
                 )
@@ -53,7 +53,7 @@ class AIEngineClient:
         def reset():
             try:
                 response = requests.post(
-                    f"{self.base_url}/reset-model",
+                    f"{self.base_url}/api/reset-model",
                     timeout=API_TIMEOUT
                 )
                 response.raise_for_status()
@@ -82,7 +82,7 @@ class AIEngineClient:
                     filename = os.path.basename(file_path)
                     files = {'file': (filename, f, mime_type)}
                     response = requests.post(
-                        f"{self.base_url}/upload-dataset",
+                        f"{self.base_url}/api/upload-dataset",
                         files=files,
                         timeout=60
                     )
@@ -99,7 +99,7 @@ class AIEngineClient:
         def check():
             try:
                 response = requests.get(
-                    f"{self.base_url}/health",
+                    f"{self.base_url}/health",  # Health might not be under /api, check if needed
                     timeout=5
                 )
                 response.raise_for_status()
@@ -111,3 +111,64 @@ class AIEngineClient:
                     callback(False)
         
         threading.Thread(target=check, daemon=True).start()
+
+    def send_chat_message(self, message: str, callback: Callable, error_callback: Optional[Callable] = None):
+        """Send chat message asynchronously"""
+        def send():
+            try:
+                response = requests.post(
+                    f"{self.base_url}/api/chat",
+                    json={"message": message},
+                    timeout=60
+                )
+                response.raise_for_status()
+                callback(response.json())
+            except Exception as e:
+                if error_callback:
+                    error_callback(str(e))
+        
+        threading.Thread(target=send, daemon=True).start()
+
+    def upload_document(self, file_path: str, callback: Callable, error_callback: Optional[Callable] = None):
+        """Upload PDF document for chatbot ingestion"""
+        def upload():
+            try:
+                import os
+                filename = os.path.basename(file_path)
+                with open(file_path, 'rb') as f:
+                    files = {'file': (filename, f, 'application/pdf')}
+                    # Increase timeout for ingestion
+                    response = requests.post(
+                        f"{self.base_url}/api/chat/upload",
+                        files=files,
+                        timeout=300 
+                    )
+                    response.raise_for_status()
+                    callback(response.json())
+            except Exception as e:
+                self._handle_error(e, error_callback)
+        
+        threading.Thread(target=upload, daemon=True).start()
+
+    def _handle_error(self, e, error_callback):
+        """Extract detailed error message from response if possible"""
+        if not error_callback:
+            return
+            
+        msg = str(e)
+        # Check if it's an HTTPError with a response
+        if isinstance(e, requests.exceptions.HTTPError) and e.response is not None:
+            try:
+                # Try to get 'detail' from JSON response
+                # Only if content-type is json
+                content_type = e.response.headers.get('Content-Type', '')
+                if 'application/json' in content_type:
+                    error_json = e.response.json()
+                    detail = error_json.get('detail')
+                    if detail:
+                        # Format: "503 Error: Chatbot service not available..."
+                        msg = f"{e.response.status_code} Error: {detail}"
+            except:
+                pass
+        
+        error_callback(msg)

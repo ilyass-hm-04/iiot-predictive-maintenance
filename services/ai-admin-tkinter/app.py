@@ -11,6 +11,7 @@ import threading
 import json
 from datetime import datetime
 import sys
+from api_client import AIEngineClient
 
 class ModernScrollableFrame(ttk.Frame):
     """Scrollable frame for responsive layouts"""
@@ -84,6 +85,7 @@ class AIAdminDashboard:
         
         # API Configuration
         self.api_url = "http://localhost:8000"
+        self.client = AIEngineClient(self.api_url)
         
         # Custom fonts
         self.fonts = {
@@ -266,6 +268,7 @@ class AIAdminDashboard:
         
         self.create_model_status_card(left_column)
         self.create_quick_actions_card(left_column)
+        self.create_chat_card(left_column)
         
         # Right column
         right_column = ttk.Frame(self.content_frame)
@@ -291,6 +294,7 @@ class AIAdminDashboard:
         
         self.create_model_status_card(single_column)
         self.create_quick_actions_card(single_column)
+        self.create_chat_card(single_column)
         self.create_training_card(single_column)
         self.create_dataset_card(single_column)
     
@@ -474,6 +478,98 @@ class AIAdminDashboard:
                                style='Success.TButton',
                                command=self.upload_dataset)
         upload_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
+
+    def create_chat_card(self, parent):
+        """Chatbot interface card"""
+        card = self.create_card(parent, "💬 AI Assistant")
+        
+        # Chat history
+        history_frame = ttk.Frame(card)
+        history_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        self.chat_history = tk.Text(history_frame, height=12, width=40, state='disabled', wrap='word',
+                                   font=self.fonts['body'], bg=self.colors['bg_dark'], bd=0, padx=10, pady=10)
+        self.chat_history.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # Configure tags for styling
+        self.chat_history.tag_config("user", foreground=self.colors['accent'], font=self.fonts['subheading'])
+        self.chat_history.tag_config("bot", foreground=self.colors['success'], font=self.fonts['subheading'])
+        self.chat_history.tag_config("msg", foreground=self.colors['text_primary'])
+        
+        scrollbar = ttk.Scrollbar(history_frame, command=self.chat_history.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.chat_history['yscrollcommand'] = scrollbar.set
+        
+        # Input area
+        input_frame = ttk.Frame(card)
+        input_frame.pack(fill=tk.X)
+        
+        self.chat_input = ttk.Entry(input_frame, font=self.fonts['body'])
+        self.chat_input.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
+        self.chat_input.bind("<Return>", lambda e: self.send_chat_message())
+        
+        btn_frame = ttk.Frame(input_frame)
+        btn_frame.pack(side=tk.RIGHT)
+
+        upload_btn = ttk.Button(btn_frame, text="📎", width=3, style='Primary.TButton',
+                               command=self.upload_chat_document)
+        upload_btn.pack(side=tk.LEFT, padx=(5, 5))
+
+        send_btn = ttk.Button(btn_frame, text="Send", style='Primary.TButton',
+                             command=self.send_chat_message)
+        send_btn.pack(side=tk.LEFT)
+        
+    def send_chat_message(self):
+        """Send message to chatbot"""
+        msg = self.chat_input.get().strip()
+        if not msg:
+            return
+            
+        self.append_chat_message("You", msg, "user")
+        self.chat_input.delete(0, tk.END)
+        self.update_status("Sending message...")
+        
+        def on_success(response):
+            answer = response.get('answer', 'No response')
+            self.root.after(0, lambda: self.append_chat_message("AI", answer, "bot"))
+            self.root.after(0, lambda: self.update_status("✓ Message sent"))
+            
+        def on_error(error):
+            self.root.after(0, lambda: self.append_chat_message("System", f"Error: {error}", "bot"))
+            self.root.after(0, lambda: self.update_status("✗ Failed to send message"))
+            
+        self.client.send_chat_message(msg, on_success, on_error)
+        
+    def append_chat_message(self, sender, message, tag):
+        """Append message to chat history"""
+        self.chat_history.configure(state='normal')
+        self.chat_history.insert(tk.END, f"{sender}:\n", tag)
+        self.chat_history.insert(tk.END, f"{message}\n\n", "msg")
+        self.chat_history.configure(state='disabled')
+        self.chat_history.see(tk.END)
+        
+    def upload_chat_document(self):
+        """Upload PDF for chatbot"""
+        filename = filedialog.askopenfilename(
+            title="Select PDF Document",
+            filetypes=[("PDF files", "*.pdf")]
+        )
+        if not filename:
+            return
+            
+        self.update_status("Uploading document...")
+        self.append_chat_message("System", f"Uploading {filename}...", "msg")
+        
+        def on_success(response):
+            msg = response.get('message', 'Upload successful')
+            self.root.after(0, lambda: self.append_chat_message("System", f"✓ {msg}", "bot"))
+            self.root.after(0, lambda: self.update_status("✓ Document uploaded"))
+            
+        def on_error(error):
+            self.root.after(0, lambda: self.append_chat_message("System", f"✗ Upload failed: {error}", "bot"))
+            self.root.after(0, lambda: self.update_status("✗ Upload failed"))
+            
+        self.client.upload_document(filename, on_success, on_error)
         
     def create_card(self, parent, title):
         """Create modern card container"""

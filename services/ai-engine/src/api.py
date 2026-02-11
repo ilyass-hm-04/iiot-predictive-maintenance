@@ -13,6 +13,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 import uvicorn
 import os
+import shutil
 import json
 import pickle
 import csv
@@ -155,12 +156,26 @@ except ImportError as e:
     ENHANCED_ML_AVAILABLE = False
     print(f"⚠️  Enhanced ML modules not available: {e}")
 
+# Initialize Chatbot
+chatbot = None
+chatbot_init_error = None
+try:
+    from src.chatbot import RAGChatbot
+    chatbot = RAGChatbot()
+    print("✓ Chatbot initialized")
+except Exception as e:
+    chatbot_init_error = str(e)
+    print(f"⚠️  Warning: Could not initialize Chatbot: {e}")
+
 
 # Pydantic models for request bodies
 class TrainRequest(BaseModel):
     n_estimators: Optional[int] = 100
     contamination: Optional[float] = 0.1
     random_state: Optional[int] = 42
+
+class ChatRequest(BaseModel):
+    message: str
 
 class MaintenanceTaskCreate(BaseModel):
     equipmentId: str
@@ -629,6 +644,48 @@ def generate_maintenance_report_pdf(task_id: str):
             "Content-Disposition": f"attachment; filename=maintenance-report-{task_id}.pdf"
         }
     )
+
+@app.post("/api/chat")
+async def chat_endpoint(request: ChatRequest):
+    """Chat with the RAG chatbot."""
+    if not chatbot:
+        detail = f"Chatbot service not available. Error: {chatbot_init_error}" if chatbot_init_error else "Chatbot service not initialized"
+        raise HTTPException(status_code=503, detail=detail)
+    
+    try:
+        response = chatbot.query(request.message)
+        return {"answer": response["answer"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/chat/upload")
+async def upload_document(file: UploadFile = File(...)):
+    """Upload a PDF document to the chatbot knowledge base."""
+    if not chatbot:
+        detail = f"Chatbot service not available. Error: {chatbot_init_error}" if chatbot_init_error else "Chatbot service not initialized"
+        raise HTTPException(status_code=503, detail=detail)
+    
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+        
+    try:
+        # Create temp file
+        temp_dir = "data/uploads"
+        os.makedirs(temp_dir, exist_ok=True)
+        file_path = os.path.join(temp_dir, file.filename)
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        # Ingest
+        chatbot.ingest_data(file_path, is_directory=False)
+        
+        # Clean up (optional, keep for now or delete)
+        # os.remove(file_path)
+        
+        return {"message": f"Successfully uploaded and ingested {file.filename}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 def generate_pdf_report(task: dict, buffer: io.BytesIO) -> bytes:
     """Generate a comprehensive PDF maintenance report."""

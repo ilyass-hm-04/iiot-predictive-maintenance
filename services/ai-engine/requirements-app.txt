@@ -12,3 +12,16 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 authlib==1.3.0
 httpx==0.27.0
+
+# Chatbot Dependencies
+langchain==0.2.14
+langchain-community==0.2.12
+langchain-core==0.2.33
+langchain-pinecone==0.1.3
+langchain-openai==0.1.20
+pinecone-client==5.0.1
+python-dotenv==1.0.1
+sentence-transformers==3.0.1
+openai==1.40.0
+pypdf==4.3.1
+tiktoken==0.7.0
