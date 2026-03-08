@@ -128,6 +128,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+def health_check():
+    """Health check endpoint for Docker."""
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+
 # Initialize InfluxDB client
 try:
     influx_client = InfluxDBClient(host=INFLUX_HOST, port=INFLUX_PORT)
@@ -182,6 +187,7 @@ class MaintenanceTaskCreate(BaseModel):
     title: str
     description: str
     dueDate: str
+    nextDueDate: Optional[str] = None
     priority: str  # LOW, MEDIUM, HIGH
     anomalyId: Optional[str] = None
     aiDetectedCause: Optional[str] = None
@@ -194,6 +200,7 @@ class MaintenanceTaskUpdate(BaseModel):
     completedBy: Optional[str] = None
     completionNotes: Optional[str] = None
     completedAt: Optional[str] = None
+    nextDueDate: Optional[str] = None
 
 
 def classify_eisenhower_matrix(priority: str, days_until_due: int, has_anomaly: bool) -> tuple[str, str, int]:
@@ -307,7 +314,8 @@ def auto_create_task_from_anomaly(equipment_id: str, vibration: float, temperatu
         "orderPriority": order_priority,
         "eisenhowerQuadrant": quadrant,
         "createdAt": datetime.utcnow().isoformat() + "Z",
-        "autoCreated": True
+        "autoCreated": True,
+        "nextDueDate": None
     }
     
     _maintenance_tasks_db.append(new_task)
@@ -485,7 +493,8 @@ _maintenance_tasks_db: List[Dict[str, Any]] = [
         "orderPriority": 2,
         "eisenhowerQuadrant": "SCHEDULE",
         "createdAt": "2025-12-01T10:00:00Z",
-        "autoCreated": False
+        "autoCreated": False,
+        "nextDueDate": "2026-03-15"
     },
     {
         "id": "T-1002",
@@ -506,7 +515,8 @@ _maintenance_tasks_db: List[Dict[str, Any]] = [
         "orderPriority": 1,
         "eisenhowerQuadrant": "DO_FIRST",
         "createdAt": "2025-12-09T08:30:00Z",
-        "autoCreated": True
+        "autoCreated": True,
+        "nextDueDate": "2026-01-12"
     },
     {
         "id": "T-1003",
@@ -527,7 +537,8 @@ _maintenance_tasks_db: List[Dict[str, Any]] = [
         "orderPriority": 4,
         "eisenhowerQuadrant": "ELIMINATE",
         "createdAt": "2025-12-05T14:00:00Z",
-        "autoCreated": False
+        "autoCreated": False,
+        "nextDueDate": "2027-12-20"
     },
 ]
 
@@ -593,7 +604,8 @@ def create_maintenance_task(task: MaintenanceTaskCreate) -> dict:
         "orderPriority": order_priority,
         "eisenhowerQuadrant": quadrant,
         "createdAt": datetime.utcnow().isoformat() + "Z",
-        "autoCreated": False
+        "autoCreated": False,
+        "nextDueDate": task.nextDueDate
     }
     
     _maintenance_tasks_db.append(new_task)
@@ -617,6 +629,10 @@ def update_maintenance_task(task_id: str, update: MaintenanceTaskUpdate) -> dict
         task["completionNotes"] = update.completionNotes
     if update.completedAt is not None:
         task["completedAt"] = update.completedAt
+    
+    # Also allow updating nextDueDate if passed (we can add it to MaintenanceTaskUpdate)
+    if hasattr(update, "nextDueDate") and getattr(update, "nextDueDate", None) is not None:
+        task["nextDueDate"] = update.nextDueDate
     
     # Auto-set completion timestamp if status changed to DONE
     if update.status == "DONE" and not task["completedAt"]:

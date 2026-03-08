@@ -5,7 +5,7 @@ services:
   # ==========================================
   # INFRASTRUCTURE LAYER
   # ==========================================
-  
+
   # MQTT Broker
   mosquitto:
     image: eclipse-mosquitto:2.0
@@ -19,7 +19,7 @@ services:
       - iiot_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      test: [ "CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3" ]
       interval: 10s
       timeout: 3s
       retries: 2
@@ -43,7 +43,7 @@ services:
       - iiot_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8086/ping" ]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -65,7 +65,7 @@ services:
       - iiot_net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iiot_admin -d iiot_users"]
+      test: [ "CMD-SHELL", "pg_isready -U iiot_admin -d iiot_users" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -74,7 +74,7 @@ services:
   # ==========================================
   # AUTHENTICATION SERVICE
   # ==========================================
-  
+
   auth-service:
     build:
       context: ./services/auth-service
@@ -98,7 +98,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
       interval: 10s
       timeout: 3s
       retries: 2
@@ -107,7 +107,7 @@ services:
   # ==========================================
   # AI ENGINE SERVICE (Brain)
   # ==========================================
-  
+
   ai-engine:
     build:
       context: ./services/ai-engine
@@ -116,7 +116,7 @@ services:
         BUILDKIT_INLINE_CACHE: 1
     container_name: iiot_ai_engine
     ports:
-      - "8000:8000"  # FastAPI
+      - "8000:8000" # FastAPI
     environment:
       - INFLUX_HOST=influxdb
       - INFLUX_PORT=8086
@@ -126,6 +126,8 @@ services:
       - PYTHONUNBUFFERED=1
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-change-in-production}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
     volumes:
       - ./services/ai-engine/src:/app/src
       - ./services/ai-engine/models:/app/models
@@ -137,7 +139,7 @@ services:
       - mosquitto
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 10s
       timeout: 3s
       retries: 2
@@ -146,7 +148,7 @@ services:
   # ==========================================
   # SIMULATOR SERVICE
   # ==========================================
-  
+
   simulator:
     build:
       context: ./services/simulator
@@ -170,7 +172,7 @@ services:
   # ==========================================
   # WEB FRONTEND SERVICE
   # ==========================================
-  
+
   web-frontend:
     build:
       context: ./services/web-frontend
@@ -191,14 +193,13 @@ services:
       - ai-engine
       - auth-service
     restart: unless-stopped
-
   # ==========================================
   # AI Admin: Use native Tkinter app (services/ai-admin-tkinter/app.py)
   # Run locally: python services/ai-admin-tkinter/app.py
 
-# ==========================================
-# NETWORKING
-# ==========================================
+  # ==========================================
+  # NETWORKING
+  # ==========================================
 
 networks:
   iiot_net:

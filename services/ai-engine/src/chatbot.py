@@ -39,7 +39,7 @@ class RAGChatbot:
         self.llm = self._initialize_llm()
         
         # Initialize Chain
-        self.rag_chain = self._initialize_chain()
+        self.retriever, self.qa_chain = self._initialize_chain()
 
     def _initialize_embeddings(self):
         """Initialize HuggingFace embeddings."""
@@ -79,6 +79,7 @@ class RAGChatbot:
         You MUST answer ONLY using the information explicitly present in the provided manual context.
 
         STRICT RULES:
+        - IMPORTANT: You MUST write your final answer in the exact SAME LANGUAGE as the user's original question.
         - Only provide the information requested in the following sections.
         - Do NOT add, infer, or invent any information.
         - If a section is not present in the manual, write "Information not available in the manual" for that section.
@@ -105,7 +106,7 @@ class RAGChatbot:
 
         retriever = self.vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 3})
         question_answer_chain = create_stuff_documents_chain(self.llm, prompt)
-        return create_retrieval_chain(retriever, question_answer_chain)
+        return retriever, question_answer_chain
 
     def ingest_data(self, data_path: str, glob_pattern: str = "*.pdf", is_directory: bool = True):
         """Load, split, and ingest documents into Pinecone."""
@@ -140,8 +141,29 @@ class RAGChatbot:
         print("Ingestion complete.")
 
     def query(self, input_text: str) -> Dict[str, Any]:
-        """Query the RAG chain."""
-        return self.rag_chain.invoke({"input": input_text})
+        """Query the RAG chain with multilingual support."""
+        try:
+            # 1. Translate question to English for better vector search
+            trans_prompt = f"Translate the following question to english (just output the translation, nothing else, no quotes): {input_text}"
+            english_q = self.llm.invoke([HumanMessage(content=trans_prompt)]).content
+            
+            # 2. Retrieve using english query
+            docs = self.retriever.invoke(english_q)
+            
+            # 3. Answer using standard chain but passing original question
+            ans = self.qa_chain.invoke({
+                "input": f"Original Question: {input_text}\n(English translation: {english_q})",
+                "context": docs
+            })
+            
+            # Match old return signature where ans is a dict with "answer" key if it was a create_retrieval_chain, 
+            # but create_stuff_documents_chain returns just the string "answer" or dict depending on versions.
+            # create_stuff_documents_chain usually returns just the string if output_parser is StrOutputParser, 
+            # but here it is usually a string. Let's wrap it in a dict to match expected output.
+            return {"answer": ans, "context": docs}
+        except Exception as e:
+            print(f"Error in RAG query: {e}")
+            return {"answer": "Error processing request.", "context": []}
 
 if __name__ == "__main__":
     # Example usage

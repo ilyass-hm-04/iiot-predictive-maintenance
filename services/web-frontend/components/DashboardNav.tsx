@@ -3,20 +3,22 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { 
-  LayoutDashboard, 
-  Database, 
-  AlertTriangle, 
-  TrendingUp, 
-  Wrench, 
-  Calendar, 
-  Clock, 
-  FileText, 
-  Activity 
+import {
+  LayoutDashboard,
+  Database,
+  AlertTriangle,
+  TrendingUp,
+  Wrench,
+  Calendar,
+  Clock,
+  FileText,
+  Activity,
+  MessageSquare
 } from "lucide-react"
 
 const items = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/chatbot", label: "Chatbot", icon: MessageSquare },
   { href: "/dashboard/data", label: "Data", icon: Database },
   { href: "/dashboard/anomaly", label: "Anomaly", icon: AlertTriangle },
   { href: "/dashboard/prediction", label: "Prediction", icon: TrendingUp },
@@ -34,7 +36,7 @@ interface DashboardNavProps {
 
 export default function DashboardNav({ mobile = false, onNavigate }: DashboardNavProps) {
   const pathname = usePathname()
-  
+
   return (
     <nav className={cn(
       "flex flex-col gap-1",
@@ -43,7 +45,7 @@ export default function DashboardNav({ mobile = false, onNavigate }: DashboardNa
       {items.map((item) => {
         const active = pathname === item.href
         const Icon = item.icon
-        
+
         return (
           <Link
             key={item.href}

@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Calendar, dateFnsLocalizer, Event } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { enUS } from 'date-fns/locale'
@@ -43,13 +45,13 @@ type Task = {
   completionNotes: string | null
   completedAt: string | null
   anomalyId: string | null
-  aiDetectedCause: string | null
   createdAt: string
   urgency?: 'URGENT' | 'NOT_URGENT'
   importance?: 'IMPORTANT' | 'NOT_IMPORTANT'
   orderPriority?: number
   eisenhowerQuadrant?: string
   autoCreated?: boolean
+  nextDueDate?: string | null
 }
 
 type CalendarEvent = Event & {
@@ -71,7 +73,8 @@ const upcomingTasks: Task[] = [
     completedAt: null,
     anomalyId: null,
     aiDetectedCause: null,
-    createdAt: '2025-12-01T10:00:00Z'
+    createdAt: '2025-12-01T10:00:00Z',
+    nextDueDate: '2026-03-15'
   },
   {
     id: 'T-1002',
@@ -87,7 +90,8 @@ const upcomingTasks: Task[] = [
     completedAt: null,
     anomalyId: 'A-2025-12-09-001',
     aiDetectedCause: 'Vibration levels exceeded normal range (85.3). Possible belt misalignment or bearing wear detected.',
-    createdAt: '2025-12-09T08:30:00Z'
+    createdAt: '2025-12-09T08:30:00Z',
+    nextDueDate: '2026-01-12'
   },
   {
     id: 'T-1003',
@@ -103,7 +107,8 @@ const upcomingTasks: Task[] = [
     completedAt: null,
     anomalyId: null,
     aiDetectedCause: null,
-    createdAt: '2025-12-05T14:00:00Z'
+    createdAt: '2025-12-05T14:00:00Z',
+    nextDueDate: '2027-12-20'
   },
 ]
 
@@ -131,7 +136,20 @@ export default function MaintenancePage() {
   const [isUpdating, setIsUpdating] = useState(false)
   const [assignTo, setAssignTo] = useState<string>('')
   const [completionNotes, setCompletionNotes] = useState<string>('')
-  
+
+  // Create Task State
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const [newTaskForm, setNewTaskForm] = useState({
+    title: '',
+    description: '',
+    equipmentId: '',
+    priority: 'MEDIUM',
+    dueDate: '',
+    nextDueDate: '',
+    assignedTo: ''
+  })
+
   const fetcher = (url: string) => fetch(url).then(res => res.json())
   const { data, error } = useSWR<Task[]>(
     apiUrl('/api/maintenance/tasks'),
@@ -149,7 +167,7 @@ export default function MaintenancePage() {
 
   const handleUpdateStatus = async (status: Task['status']) => {
     if (!selectedTask) return
-    
+
     setIsUpdating(true)
     try {
       const response = await fetch(apiUrl(`/api/maintenance/tasks/${selectedTask.id}`), {
@@ -162,7 +180,7 @@ export default function MaintenancePage() {
           completedBy: status === 'DONE' ? (assignTo || 'Unknown') : null,
         }),
       })
-      
+
       if (response.ok) {
         await mutate(apiUrl('/api/maintenance/tasks'))
         setIsDetailsOpen(false)
@@ -176,10 +194,10 @@ export default function MaintenancePage() {
 
   const handleGenerateReport = async () => {
     if (!selectedTask) return
-    
+
     try {
       const response = await fetch(apiUrl(`/api/maintenance/report/${selectedTask.id}`))
-      
+
       if (response.ok) {
         // Download the PDF
         const blob = await response.blob()
@@ -232,6 +250,63 @@ export default function MaintenancePage() {
     handleViewTask(event.task)
   }, [])
 
+  const handleSelectSlot = useCallback(({ start }: { start: Date }) => {
+    const defaultStart = new Date(start)
+    const defaultNext = new Date(start)
+    defaultNext.setDate(defaultNext.getDate() + 30)
+
+    setNewTaskForm({
+      title: '',
+      description: '',
+      equipmentId: '',
+      priority: 'MEDIUM',
+      dueDate: defaultStart.toISOString().split('T')[0],
+      nextDueDate: defaultNext.toISOString().split('T')[0],
+      assignedTo: ''
+    })
+    setIsCreateOpen(true)
+  }, [])
+
+  const handleCreateTask = async () => {
+    if (!newTaskForm.title || !newTaskForm.equipmentId) {
+      alert("Le titre et l'équipement sont obligatoires.")
+      return
+    }
+
+    setIsCreating(true)
+    try {
+      const postRes = await fetch(apiUrl('/api/maintenance/tasks'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          equipmentId: newTaskForm.equipmentId,
+          title: newTaskForm.title,
+          description: newTaskForm.description,
+          dueDate: newTaskForm.dueDate,
+          nextDueDate: newTaskForm.nextDueDate || null,
+          priority: newTaskForm.priority,
+        }),
+      })
+
+      if (postRes.ok) {
+        const createdTask = await postRes.json()
+        if (newTaskForm.assignedTo) {
+          await fetch(apiUrl(`/api/maintenance/tasks/${createdTask.id}`), {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assignedTo: newTaskForm.assignedTo }),
+          })
+        }
+        await mutate(apiUrl('/api/maintenance/tasks'))
+        setIsCreateOpen(false)
+      }
+    } catch (error) {
+      console.error('Failed to create task:', error)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 gap-4">
       <Card>
@@ -249,7 +324,7 @@ export default function MaintenancePage() {
                 <TabsTrigger value="analytics" className="whitespace-nowrap px-3 sm:px-4">Analytics</TabsTrigger>
               </TabsList>
             </div>
-            
+
             <TabsContent value="calendar">
               <div className="h-[600px] sm:h-[700px] bg-slate-950 rounded-lg p-2 sm:p-4 border border-slate-800 overflow-x-auto">
                 <div className="min-w-[600px] h-full">
@@ -259,9 +334,12 @@ export default function MaintenancePage() {
                     startAccessor="start"
                     endAccessor="end"
                     style={{ height: '100%' }}
-                    onSelectEvent={(event) => handleViewTask((event as CalendarEvent).task)}
+                    onSelectEvent={handleSelectEvent}
+                    onSelectSlot={handleSelectSlot}
+                    selectable={true}
                     eventPropGetter={eventStyleGetter}
-                    views={['month', 'week', 'day']}
+                    views={['month', 'week', 'day', 'agenda']}
+                    defaultView="month"
                   />
                 </div>
                 <style jsx global>{`
@@ -354,20 +432,9 @@ export default function MaintenancePage() {
                     }
                   }
                 `}</style>
-                <Calendar
-                  localizer={localizer}
-                  events={events}
-                  startAccessor="start"
-                  endAccessor="end"
-                  style={{ height: '100%' }}
-                  eventPropGetter={eventStyleGetter}
-                  views={['month', 'week', 'day', 'agenda']}
-                  defaultView="month"
-                  onSelectEvent={handleSelectEvent}
-                />
               </div>
             </TabsContent>
-            
+
             <TabsContent value="list">
               <div className="overflow-x-auto -mx-2 sm:mx-0">
                 <div className="min-w-[700px] px-2 sm:px-0">
@@ -376,7 +443,8 @@ export default function MaintenancePage() {
                       <tr className="text-slate-400">
                         <th className="text-left px-3 py-2 whitespace-nowrap">Task</th>
                         <th className="text-left px-3 py-2 whitespace-nowrap">Equipment</th>
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Due</th>
+                        <th className="text-left px-3 py-2 whitespace-nowrap">Due Date</th>
+                        <th className="text-left px-3 py-2 whitespace-nowrap">Next Date</th>
                         <th className="text-left px-3 py-2 whitespace-nowrap">Priority</th>
                         <th className="text-left px-3 py-2 whitespace-nowrap">Status</th>
                         <th className="text-left px-3 py-2 whitespace-nowrap">Assigned</th>
@@ -389,32 +457,33 @@ export default function MaintenancePage() {
                           <td className="px-3 py-2 text-white font-medium whitespace-nowrap">{t.title}</td>
                           <td className="px-3 py-2 text-slate-300 whitespace-nowrap">{t.equipmentId}</td>
                           <td className="px-3 py-2 text-slate-300 whitespace-nowrap">{t.dueDate}</td>
+                          <td className="px-3 py-2 text-slate-300 whitespace-nowrap">{t.nextDueDate || '-'}</td>
                           <td className="px-3 py-2"><PriorityBadge priority={t.priority} /></td>
                           <td className="px-3 py-2"><StatusBadge status={t.status} /></td>
                           <td className="px-3 py-2 text-slate-300 whitespace-nowrap">
                             {t.assignedTo || <span className="text-slate-500">Unassigned</span>}
                           </td>
                           <td className="px-3 py-2">
-                            <Button 
-                              onClick={() => handleViewTask(t)} 
-                              variant="outline" 
+                            <Button
+                              onClick={() => handleViewTask(t)}
+                              variant="outline"
                               size="sm"
-                            className="bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
-                          >
-                            View
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {error && (
-                  <p className="text-xs text-slate-500 mt-2">Showing sample tasks (API unavailable).</p>
-                )}
+                              className="bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
+                            >
+                              View
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {error && (
+                    <p className="text-xs text-slate-500 mt-2">Showing sample tasks (API unavailable).</p>
+                  )}
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="matrix">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* DO FIRST - Urgent & Important (Quadrant 1) */}
@@ -438,7 +507,10 @@ export default function MaintenancePage() {
                             <StatusBadge status={t.status} />
                           </div>
                           <div className="text-xs text-slate-400">{t.equipmentId}</div>
-                          <div className="text-xs text-slate-500 mt-1">Due: {t.dueDate}</div>
+                          <div className="text-xs text-slate-500 mt-1">
+                            <span className="font-medium text-slate-300">A faire:</span> {t.dueDate}
+                            {t.nextDueDate && <span className="ml-2"><span className="font-medium text-slate-300">A refaire:</span> {t.nextDueDate}</span>}
+                          </div>
                           {t.autoCreated && (
                             <div className="text-xs text-yellow-400 mt-1">⚡ Auto-created</div>
                           )}
@@ -471,7 +543,10 @@ export default function MaintenancePage() {
                             <StatusBadge status={t.status} />
                           </div>
                           <div className="text-xs text-slate-400">{t.equipmentId}</div>
-                          <div className="text-xs text-slate-500 mt-1">Due: {t.dueDate}</div>
+                          <div className="text-xs text-slate-500 mt-1">
+                            <span className="font-medium text-slate-300">A faire:</span> {t.dueDate}
+                            {t.nextDueDate && <span className="ml-2"><span className="font-medium text-slate-300">A refaire:</span> {t.nextDueDate}</span>}
+                          </div>
                           {t.autoCreated && (
                             <div className="text-xs text-yellow-400 mt-1">⚡ Auto-created</div>
                           )}
@@ -504,7 +579,10 @@ export default function MaintenancePage() {
                             <StatusBadge status={t.status} />
                           </div>
                           <div className="text-xs text-slate-400">{t.equipmentId}</div>
-                          <div className="text-xs text-slate-500 mt-1">Due: {t.dueDate}</div>
+                          <div className="text-xs text-slate-500 mt-1">
+                            <span className="font-medium text-slate-300">A faire:</span> {t.dueDate}
+                            {t.nextDueDate && <span className="ml-2"><span className="font-medium text-slate-300">A refaire:</span> {t.nextDueDate}</span>}
+                          </div>
                           {t.autoCreated && (
                             <div className="text-xs text-yellow-400 mt-1">⚡ Auto-created</div>
                           )}
@@ -537,7 +615,10 @@ export default function MaintenancePage() {
                             <StatusBadge status={t.status} />
                           </div>
                           <div className="text-xs text-slate-400">{t.equipmentId}</div>
-                          <div className="text-xs text-slate-500 mt-1">Due: {t.dueDate}</div>
+                          <div className="text-xs text-slate-500 mt-1">
+                            <span className="font-medium text-slate-300">A faire:</span> {t.dueDate}
+                            {t.nextDueDate && <span className="ml-2"><span className="font-medium text-slate-300">A refaire:</span> {t.nextDueDate}</span>}
+                          </div>
                           {t.autoCreated && (
                             <div className="text-xs text-yellow-400 mt-1">⚡ Auto-created</div>
                           )}
@@ -554,12 +635,12 @@ export default function MaintenancePage() {
             {/* Analytics Tab with Pareto Chart */}
             <TabsContent value="analytics">
               <div className="space-y-6">
-                <ParetoChart 
+                <ParetoChart
                   type="maintenance"
                   title="Maintenance Task Distribution"
                   showCost={true}
                 />
-                
+
                 <Card className="border-slate-800 bg-slate-900/40">
                   <CardHeader>
                     <CardTitle className="text-lg">Cost Analysis Summary</CardTitle>
@@ -607,9 +688,16 @@ export default function MaintenancePage() {
                   <div>
                     <label className="text-sm font-medium text-slate-400 flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
-                      Due Date
+                      Date à faire (Due)
                     </label>
                     <div className="mt-1 text-white">{selectedTask.dueDate}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-400 flex items-center gap-1">
+                      <CalendarIcon className="w-4 h-4 text-emerald-500" />
+                      Date pour la refaire (Next)
+                    </label>
+                    <div className="mt-1 text-emerald-400 font-medium">{selectedTask.nextDueDate || 'Non définie'}</div>
                   </div>
                 </div>
 
@@ -628,7 +716,7 @@ export default function MaintenancePage() {
                         <span className="text-xs text-slate-500">Urgency</span>
                         <div className="mt-1">
                           <Badge variant="outline" className={
-                            selectedTask.urgency === 'URGENT' 
+                            selectedTask.urgency === 'URGENT'
                               ? 'bg-red-500/10 text-red-400 border-red-500/30'
                               : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
                           }>
@@ -776,6 +864,118 @@ export default function MaintenancePage() {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Task Creation Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Créer une Tâche de Maintenance</DialogTitle>
+            <DialogDescription>
+              Planifiez une nouvelle intervention manuellement.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-slate-200">Titre de la tâche</Label>
+                <Input
+                  id="title"
+                  value={newTaskForm.title}
+                  onChange={(e) => setNewTaskForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Ex: Remplacement du filtre"
+                  className="bg-slate-950 border-slate-800 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="equipment" className="text-slate-200">Equipement</Label>
+                <Select value={newTaskForm.equipmentId} onValueChange={(val) => setNewTaskForm(prev => ({ ...prev, equipmentId: val }))}>
+                  <SelectTrigger className="bg-slate-950 border-slate-800 text-white">
+                    <SelectValue placeholder="Choisir un équipement" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                    <SelectItem value="PRESS_001">PRESS_001</SelectItem>
+                    <SelectItem value="CONV_014">CONV_014</SelectItem>
+                    <SelectItem value="MOTOR_207">MOTOR_207</SelectItem>
+                    <SelectItem value="MACHINE_002">MACHINE_002</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dueDate" className="text-slate-200">Date à faire</Label>
+                <Input
+                  id="dueDate"
+                  type="date"
+                  value={newTaskForm.dueDate}
+                  onChange={(e) => setNewTaskForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                  className="bg-slate-950 border-slate-800 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nextDueDate" className="text-slate-200">A refaire le</Label>
+                <Input
+                  id="nextDueDate"
+                  type="date"
+                  value={newTaskForm.nextDueDate}
+                  onChange={(e) => setNewTaskForm(prev => ({ ...prev, nextDueDate: e.target.value }))}
+                  className="bg-slate-950 border-slate-800 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="priority" className="text-slate-200">Priorité</Label>
+                <Select value={newTaskForm.priority} onValueChange={(val) => setNewTaskForm(prev => ({ ...prev, priority: val }))}>
+                  <SelectTrigger className="bg-slate-950 border-slate-800 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                    <SelectItem value="LOW">Basse (LOW)</SelectItem>
+                    <SelectItem value="MEDIUM">Moyenne (MEDIUM)</SelectItem>
+                    <SelectItem value="HIGH">Haute (HIGH)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="assignedTo" className="text-slate-200">Assigner au technicien (Optionnel)</Label>
+              <Select value={newTaskForm.assignedTo} onValueChange={(val) => setNewTaskForm(prev => ({ ...prev, assignedTo: val }))}>
+                <SelectTrigger className="bg-slate-950 border-slate-800 text-white">
+                  <SelectValue placeholder="Non assigné" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                  <SelectItem value="John Smith">John Smith</SelectItem>
+                  <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
+                  <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                  <SelectItem value="David Brown">David Brown</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="desc" className="text-slate-200">Description</Label>
+              <Textarea
+                id="desc"
+                value={newTaskForm.description}
+                onChange={(e) => setNewTaskForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Détails de l'intervention..."
+                className="bg-slate-950 border-slate-800 text-white min-h-[100px]"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)} className="bg-transparent text-slate-300 border-slate-700 hover:bg-slate-800">
+              Annuler
+            </Button>
+            <Button onClick={handleCreateTask} disabled={isCreating} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {isCreating ? "Création..." : "Créer la tâche"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

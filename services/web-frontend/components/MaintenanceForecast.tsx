@@ -50,7 +50,10 @@ export default function MaintenanceForecast({
     try {
       const dueDate = new Date()
       dueDate.setDate(dueDate.getDate() + Math.max(1, daysUntilMaintenance - 1))
-      
+
+      const nextDueDateStr = new Date(dueDate)
+      nextDueDateStr.setDate(nextDueDateStr.getDate() + 30)
+
       const response = await fetch(apiUrl('/api/maintenance/tasks'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,12 +62,13 @@ export default function MaintenanceForecast({
           title: `Scheduled maintenance for ${machineName}`,
           description: `Predicted maintenance required based on AI analysis.\n\nHealth Score: ${healthScore}%\nDays until service: ${daysUntilMaintenance}\n\nCritical factors:\n${criticalFactors.map(f => `- ${f}`).join('\n')}`,
           dueDate: dueDate.toISOString().split('T')[0],
+          nextDueDate: nextDueDateStr.toISOString().split('T')[0],
           priority: getPriorityLevel(daysUntilMaintenance),
           anomalyId: null,
           aiDetectedCause: `Predictive maintenance scheduling. Current health: ${healthScore}%. Estimated ${daysUntilMaintenance} days until service required.`,
         }),
       })
-      
+
       if (response.ok) {
         await mutate(apiUrl('/api/maintenance/tasks'))
         alert(`✓ Maintenance task added to calendar for ${dueDate.toLocaleDateString()}`)
@@ -102,11 +106,11 @@ export default function MaintenanceForecast({
                 {daysUntilMaintenance <= 3
                   ? '⚠️ Urgent: Maintenance Required Soon'
                   : daysUntilMaintenance <= 7
-                  ? '⚠️ Maintenance Recommended This Week'
-                  : 'Upcoming Maintenance'}
+                    ? '⚠️ Maintenance Recommended This Week'
+                    : 'Upcoming Maintenance'}
               </p>
               <p className="text-sm opacity-90">
-                Based on current health score of <strong>{healthScore}%</strong>, 
+                Based on current health score of <strong>{healthScore}%</strong>,
                 maintenance is recommended in approximately <strong>{daysUntilMaintenance} days</strong>.
               </p>
             </div>
