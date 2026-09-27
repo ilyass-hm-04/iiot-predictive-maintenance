@@ -101,11 +101,11 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'CRITICAL': return 'bg-red-500'
-      case 'WARNING': return 'bg-orange-500'
-      case 'ATTENTION': return 'bg-yellow-500'
-      case 'NORMAL': return 'bg-blue-500'
-      case 'HEALTHY': return 'bg-green-500'
+      case 'CRITICAL': return 'bg-red-500 text-white'
+      case 'WARNING': return 'bg-orange-500 text-white'
+      case 'ATTENTION': return 'bg-signal text-neutral-950'
+      case 'NORMAL': return 'bg-white text-neutral-950'
+      case 'HEALTHY': return 'bg-green-500 text-neutral-950'
       default: return 'bg-gray-500'
     }
   }
@@ -114,7 +114,7 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
     switch (urgency) {
       case 'IMMEDIATE': return 'text-red-400 bg-red-500/10 border-red-500/30'
       case 'HIGH': return 'text-orange-400 bg-orange-500/10 border-orange-500/30'
-      case 'MEDIUM': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30'
+      case 'MEDIUM': return 'text-signal bg-signal/10 border-signal/30'
       case 'LOW': return 'text-green-400 bg-green-500/10 border-green-500/30'
       default: return 'text-gray-400 bg-gray-500/10 border-gray-500/30'
     }
@@ -136,10 +136,10 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
 
   if (loading) {
     return (
-      <Card className="border-slate-800">
+      <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-32">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-signal border-t-transparent rounded-full animate-spin" />
           </div>
         </CardContent>
       </Card>
@@ -167,27 +167,27 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
   }
 
   return (
-    <Card className="border-slate-800">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-blue-500" />
+        <CardTitle className="flex items-center gap-3 text-xl font-normal tracking-[-0.02em] sm:text-2xl">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/[0.06]"><Clock className="w-[18px] h-[18px] text-slate-300" /></span>
           Remaining Useful Life (RUL) Prediction
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="sm:pl-[52px]">
           ML-based prediction of days until maintenance required
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {rulData.map((data) => (
-          <div key={data.machine_id} className="border border-slate-800 rounded-lg p-4 space-y-4">
+          <div key={data.machine_id} className="bg-ink ring-1 ring-white/[0.06] rounded-[10px] p-5 sm:p-6 space-y-5">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${getStatusColor(data.status)} bg-opacity-20 shrink-0`}>
+                <div className={`flex size-10 items-center justify-center rounded-full ${getStatusColor(data.status)} shrink-0`}>
                   {getStatusIcon(data.status)}
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-lg truncate">{data.machine_id}</h3>
+                  <h3 className="font-mono text-lg truncate">{data.machine_id}</h3>
                   <p className="text-sm text-slate-400">
                     Health: {data.health_score}% • Confidence: {data.confidence}%
                   </p>
@@ -201,10 +201,10 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
                   size="sm"
                   onClick={() => handleAddToCalendar(data)}
                   disabled={addingTaskFor === data.machine_id}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  variant="light"
                 >
                   {addingTaskFor === data.machine_id ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-neutral-950 border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
                       <Plus className="w-4 h-4 mr-1" />
@@ -222,18 +222,18 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
                   <Clock className="w-4 h-4" />
                   <span className="text-sm font-medium">Days Remaining</span>
                 </div>
-                <div className="text-4xl font-bold">{data.rul_days}</div>
+                <div className="text-5xl font-normal tracking-[-0.04em]">{data.rul_days}</div>
                 <div className="text-xs opacity-70 mt-1">
                   {data.urgency} urgency
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-900/40 border border-slate-800">
+              <div className="p-4 rounded-lg bg-graphite ring-1 ring-white/[0.06]">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className="w-4 h-4" />
                   <span className="text-sm font-medium">Predicted Date</span>
                 </div>
-                <div className="text-2xl font-bold">{data.predicted_failure_date}</div>
+                <div className="text-2xl font-normal tracking-[-0.02em] tabular-nums">{data.predicted_failure_date}</div>
                 <div className="text-xs text-slate-400 mt-1">
                   Estimated failure date
                 </div>
@@ -244,15 +244,15 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-slate-400">Health Degradation Progress</span>
-                <span className="font-semibold">{data.degradation_rate}% per day</span>
+                <span className="font-medium text-white">{data.degradation_rate}% per day</span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-white/[0.07] rounded-full h-1.5 overflow-hidden">
                 <div
                   className={`h-full transition-all duration-500 ${
                     data.rul_days <= 3 ? 'bg-red-500' :
                     data.rul_days <= 7 ? 'bg-orange-500' :
-                    data.rul_days <= 14 ? 'bg-yellow-500' :
-                    'bg-green-500'
+                    data.rul_days <= 14 ? 'bg-signal' :
+                    'bg-green-400'
                   }`}
                   style={{ width: `${Math.min(100, (data.health_score / 100) * 100)}%` }}
                 />
@@ -266,12 +266,12 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
             {/* Critical Factors */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <TrendingDown className="w-4 h-4 text-orange-400" />
+                <TrendingDown className="w-4 h-4 text-signal" />
                 <span className="text-sm font-medium">Critical Factors</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {data.critical_factors.map((factor, idx) => (
-                  <Badge key={idx} variant="outline" className="text-xs border-slate-700">
+                  <Badge key={idx} variant="outline" className="text-xs">
                     {factor}
                   </Badge>
                 ))}
@@ -280,13 +280,13 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
 
             {/* Sensor Readings */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-              <div className="flex items-center justify-between p-3 bg-slate-900/40 rounded">
+              <div className="flex items-center justify-between p-3 bg-graphite ring-1 ring-white/[0.06] rounded-lg">
                 <span className="text-slate-400">Avg Vibration</span>
                 <span className={`font-semibold ${data.avg_vibration > 75 ? 'text-red-400' : 'text-white'}`}>
                   {data.avg_vibration}
                 </span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-slate-900/40 rounded">
+              <div className="flex items-center justify-between p-3 bg-graphite ring-1 ring-white/[0.06] rounded-lg">
                 <span className="text-slate-400">Avg Temperature</span>
                 <span className={`font-semibold ${data.avg_temperature > 70 ? 'text-red-400' : 'text-white'}`}>
                   {data.avg_temperature}°C
@@ -318,7 +318,7 @@ export default function RULPrediction({ machineId, compact = false }: RULPredict
 
         {rulData.length === 0 && (
           <div className="text-center py-8 text-slate-500">
-            <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
+            <Clock className="w-12 h-12 mx-auto mb-3 opacity-40" />
             <p>No RUL data available</p>
             <p className="text-sm mt-1">Collecting baseline data...</p>
           </div>

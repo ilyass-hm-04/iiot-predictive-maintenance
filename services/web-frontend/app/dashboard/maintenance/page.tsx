@@ -19,6 +19,7 @@ import { FileText, Download, User, Calendar as CalendarIcon } from 'lucide-react
 import ParetoChart from '@/components/ParetoChart'
 import Link from 'next/link'
 import { apiUrl } from '@/lib/api-config'
+import { NotchCard, PageHeader } from '@/components/design'
 
 const locales = {
   'en-US': enUS,
@@ -45,6 +46,7 @@ type Task = {
   completionNotes: string | null
   completedAt: string | null
   anomalyId: string | null
+  aiDetectedCause?: string | null
   createdAt: string
   urgency?: 'URGENT' | 'NOT_URGENT'
   importance?: 'IMPORTANT' | 'NOT_IMPORTANT'
@@ -114,18 +116,18 @@ const upcomingTasks: Task[] = [
 
 function PriorityBadge({ priority }: { priority: Task['priority'] }) {
   const variants = {
-    LOW: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
-    MEDIUM: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30',
-    HIGH: 'bg-red-500/10 text-red-500 border-red-500/30',
+    LOW: 'bg-white/[0.04] text-slate-300 border-white/15',
+    MEDIUM: 'bg-signal/10 text-signal border-signal/30',
+    HIGH: 'bg-red-500/10 text-red-400 border-red-500/30',
   }
   return <Badge variant="outline" className={variants[priority]}>{priority}</Badge>
 }
 
 function StatusBadge({ status }: { status: Task['status'] }) {
   const variants = {
-    NOT_STARTED: 'bg-slate-500/10 text-slate-300 border-slate-500/30',
-    IN_PROGRESS: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30',
-    DONE: 'bg-green-500/10 text-green-500 border-green-500/30',
+    NOT_STARTED: 'bg-white/[0.04] text-slate-300 border-white/15',
+    IN_PROGRESS: 'bg-signal/10 text-signal border-signal/30',
+    DONE: 'bg-green-500/10 text-green-400 border-green-500/30',
   }
   return <Badge variant="outline" className={variants[status]}>{status.replace('_', ' ')}</Badge>
 }
@@ -231,15 +233,14 @@ export default function MaintenancePage() {
   // Event style customization based on priority
   const eventStyleGetter = useCallback((event: CalendarEvent) => {
     const colors = {
-      HIGH: { backgroundColor: '#ef4444', borderColor: '#dc2626' },
-      MEDIUM: { backgroundColor: '#f59e0b', borderColor: '#d97706' },
-      LOW: { backgroundColor: '#3b82f6', borderColor: '#2563eb' },
+      HIGH: { backgroundColor: '#ef4444', borderColor: '#dc2626', color: '#ffffff' },
+      MEDIUM: { backgroundColor: '#f7cf49', borderColor: '#efc22e', color: '#111111' },
+      LOW: { backgroundColor: '#e5e5e5', borderColor: '#cfcfcf', color: '#111111' },
     }
     return {
       style: {
         ...colors[event.task.priority],
-        color: 'white',
-        borderRadius: '4px',
+        borderRadius: '999px',
         border: 'none',
         display: 'block',
       },
@@ -308,16 +309,17 @@ export default function MaintenancePage() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className="grid grid-cols-1 gap-8">
+      <PageHeader
+        eyebrow="Maintenance"
+        title="Maintenance Planning"
+        description="Schedule and track maintenance tasks"
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Maintenance Planning</CardTitle>
-          <CardDescription>Schedule and track maintenance tasks</CardDescription>
-        </CardHeader>
         <CardContent>
           <Tabs defaultValue="calendar" className="w-full">
             <div className="overflow-x-auto pb-2 mb-4">
-              <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-4 gap-1">
+              <TabsList className="inline-flex w-auto min-w-full gap-1 sm:min-w-[440px]">
                 <TabsTrigger value="calendar" className="whitespace-nowrap px-3 sm:px-4">Calendar</TabsTrigger>
                 <TabsTrigger value="list" className="whitespace-nowrap px-3 sm:px-4">List</TabsTrigger>
                 <TabsTrigger value="matrix" className="whitespace-nowrap px-3 sm:px-4">Matrix</TabsTrigger>
@@ -326,7 +328,7 @@ export default function MaintenancePage() {
             </div>
 
             <TabsContent value="calendar">
-              <div className="h-[600px] sm:h-[700px] bg-slate-950 rounded-lg p-2 sm:p-4 border border-slate-800 overflow-x-auto">
+              <div className="h-[600px] sm:h-[700px] bg-coal rounded-[10px] p-2 sm:p-4 ring-1 ring-white/[0.06] overflow-x-auto">
                 <div className="min-w-[600px] h-full">
                   <Calendar
                     localizer={localizer}
@@ -344,70 +346,115 @@ export default function MaintenancePage() {
                 </div>
                 <style jsx global>{`
                   .rbc-calendar {
-                    color: #e2e8f0;
+                    color: #e4e4e4;
                     font-family: inherit;
                   }
                   .rbc-header {
-                    padding: 10px 3px;
-                    font-weight: 600;
-                    color: #94a3b8;
-                    background: #0f172a;
-                    border-bottom: 1px solid #334155;
+                    padding: 12px 3px;
+                    font-weight: 400;
+                    font-size: 0.75rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                    color: #7a7a7a;
+                    background: #131313;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
                   }
-                  .rbc-month-view, .rbc-time-view {
-                    background: #0f172a;
-                    border: 1px solid #334155;
-                    border-radius: 8px;
+                  .rbc-header + .rbc-header,
+                  .rbc-day-bg + .rbc-day-bg,
+                  .rbc-month-row + .rbc-month-row,
+                  .rbc-time-content > * + * > *,
+                  .rbc-timeslot-group,
+                  .rbc-time-header-content,
+                  .rbc-agenda-view table.rbc-agenda-table,
+                  .rbc-agenda-view table.rbc-agenda-table tbody > tr > td + td,
+                  .rbc-agenda-view table.rbc-agenda-table tbody > tr + tr {
+                    border-color: rgba(255, 255, 255, 0.06);
+                  }
+                  .rbc-month-view, .rbc-time-view, .rbc-agenda-view table.rbc-agenda-table {
+                    background: #131313;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 10px;
+                    overflow: hidden;
                   }
                   .rbc-day-bg {
-                    background: #0f172a;
-                    border-color: #1e293b;
+                    background: #161616;
                   }
                   .rbc-today {
-                    background: #1e293b;
+                    background: rgba(247, 207, 73, 0.07);
                   }
                   .rbc-off-range-bg {
-                    background: #020617;
+                    background: #111111;
                   }
                   .rbc-date-cell {
                     padding: 8px;
-                    color: #cbd5e1;
+                    color: #cfcfcf;
                   }
                   .rbc-off-range {
-                    color: #475569;
+                    color: #555555;
                   }
                   .rbc-current {
-                    color: #22d3ee;
+                    color: #f7cf49;
                   }
                   .rbc-event {
-                    padding: 2px 5px;
-                    font-size: 0.875rem;
+                    padding: 2px 8px;
+                    font-size: 0.8125rem;
                     font-weight: 500;
                     cursor: pointer;
                   }
+                  .rbc-event:focus {
+                    outline: 2px solid #f7cf49;
+                    outline-offset: 1px;
+                  }
                   .rbc-toolbar {
-                    padding: 10px 0;
-                    margin-bottom: 10px;
+                    padding: 6px 0 14px;
+                    margin-bottom: 6px;
+                    gap: 0.5rem;
                   }
                   .rbc-toolbar button {
-                    color: #e2e8f0;
-                    background: #1e293b;
-                    border: 1px solid #334155;
-                    padding: 6px 12px;
-                    border-radius: 6px;
+                    color: #cfcfcf;
+                    background: #0b0b0b;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    padding: 7px 14px;
+                    border-radius: 999px;
                     font-weight: 500;
+                    font-size: 0.8125rem;
+                    transition: background 0.2s, color 0.2s;
                   }
-                  .rbc-toolbar button:hover {
-                    background: #334155;
+                  .rbc-btn-group button + button {
+                    margin-left: 4px;
                   }
-                  .rbc-toolbar button.rbc-active {
-                    background: #0ea5e9;
-                    border-color: #0284c7;
+                  .rbc-btn-group > button:first-child:not(:last-child),
+                  .rbc-btn-group > button:last-child:not(:first-child),
+                  .rbc-btn-group > button:not(:first-child):not(:last-child) {
+                    border-radius: 999px;
+                  }
+                  .rbc-toolbar button:hover,
+                  .rbc-toolbar button:focus {
+                    background: #242424;
+                    color: #ffffff;
+                  }
+                  .rbc-toolbar button.rbc-active,
+                  .rbc-toolbar button.rbc-active:hover {
+                    background: #ffffff;
+                    color: #111111;
+                    border-color: #ffffff;
+                    box-shadow: none;
                   }
                   .rbc-toolbar-label {
-                    color: #f1f5f9;
-                    font-weight: 600;
-                    font-size: 1.125rem;
+                    color: #ffffff;
+                    font-weight: 400;
+                    font-size: 1.375rem;
+                    letter-spacing: -0.02em;
+                  }
+                  .rbc-show-more {
+                    background: transparent;
+                    color: #f7cf49;
+                  }
+                  .rbc-time-slot, .rbc-label {
+                    color: #7a7a7a;
+                  }
+                  .rbc-current-time-indicator {
+                    background-color: #f7cf49;
                   }
                   @media (max-width: 640px) {
                     .rbc-toolbar {
@@ -439,36 +486,35 @@ export default function MaintenancePage() {
               <div className="overflow-x-auto -mx-2 sm:mx-0">
                 <div className="min-w-[700px] px-2 sm:px-0">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-900/60">
-                      <tr className="text-slate-400">
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Task</th>
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Equipment</th>
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Due Date</th>
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Next Date</th>
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Priority</th>
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Status</th>
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Assigned</th>
-                        <th className="text-left px-3 py-2 whitespace-nowrap">Actions</th>
+                    <thead>
+                      <tr className="border-b border-white/10 text-xs uppercase tracking-[0.08em] text-slate-500">
+                        <th className="text-left px-3 py-4 font-normal whitespace-nowrap">Task</th>
+                        <th className="text-left px-3 py-4 font-normal whitespace-nowrap">Equipment</th>
+                        <th className="text-left px-3 py-4 font-normal whitespace-nowrap">Due Date</th>
+                        <th className="text-left px-3 py-4 font-normal whitespace-nowrap">Next Date</th>
+                        <th className="text-left px-3 py-4 font-normal whitespace-nowrap">Priority</th>
+                        <th className="text-left px-3 py-4 font-normal whitespace-nowrap">Status</th>
+                        <th className="text-left px-3 py-4 font-normal whitespace-nowrap">Assigned</th>
+                        <th className="text-left px-3 py-4 font-normal whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {tasks.map(t => (
-                        <tr key={t.id} className="border-t border-slate-800">
-                          <td className="px-3 py-2 text-white font-medium whitespace-nowrap">{t.title}</td>
-                          <td className="px-3 py-2 text-slate-300 whitespace-nowrap">{t.equipmentId}</td>
-                          <td className="px-3 py-2 text-slate-300 whitespace-nowrap">{t.dueDate}</td>
-                          <td className="px-3 py-2 text-slate-300 whitespace-nowrap">{t.nextDueDate || '-'}</td>
-                          <td className="px-3 py-2"><PriorityBadge priority={t.priority} /></td>
-                          <td className="px-3 py-2"><StatusBadge status={t.status} /></td>
-                          <td className="px-3 py-2 text-slate-300 whitespace-nowrap">
+                        <tr key={t.id} className="border-b border-white/[0.06] transition-colors last:border-b-0 hover:bg-white/[0.03]">
+                          <td className="px-3 py-3.5 text-white font-medium whitespace-nowrap">{t.title}</td>
+                          <td className="px-3 py-3.5 text-slate-300 whitespace-nowrap">{t.equipmentId}</td>
+                          <td className="px-3 py-3.5 text-slate-300 whitespace-nowrap">{t.dueDate}</td>
+                          <td className="px-3 py-3.5 text-slate-300 whitespace-nowrap">{t.nextDueDate || '-'}</td>
+                          <td className="px-3 py-3.5"><PriorityBadge priority={t.priority} /></td>
+                          <td className="px-3 py-3.5"><StatusBadge status={t.status} /></td>
+                          <td className="px-3 py-3.5 text-slate-300 whitespace-nowrap">
                             {t.assignedTo || <span className="text-slate-500">Unassigned</span>}
                           </td>
-                          <td className="px-3 py-2">
+                          <td className="px-3 py-3.5">
                             <Button
                               onClick={() => handleViewTask(t)}
-                              variant="outline"
+                              variant="light"
                               size="sm"
-                              className="bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
                             >
                               View
                             </Button>
@@ -487,9 +533,10 @@ export default function MaintenancePage() {
             <TabsContent value="matrix">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* DO FIRST - Urgent & Important (Quadrant 1) */}
-                <div className="p-4 bg-red-950/20 border-2 border-red-500/30 rounded-lg">
-                  <h3 className="text-red-400 font-bold mb-3 flex items-center gap-2">
-                    <span className="text-xl">🔥</span>
+                <div className="relative overflow-hidden rounded-[10px] bg-coal p-5 ring-1 ring-white/[0.06]">
+                  <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-red-500" />
+                  <h3 className="text-white text-[15px] font-medium tracking-[-0.01em] mb-4 flex items-center gap-2">
+                    <span className="text-base">🔥</span>
                     DO FIRST (Urgent & Important)
                   </h3>
                   <div className="space-y-2">
@@ -499,7 +546,7 @@ export default function MaintenancePage() {
                       .map(t => (
                         <div
                           key={t.id}
-                          className="p-3 bg-slate-900/80 border border-slate-700 rounded cursor-pointer hover:bg-slate-800 transition-colors"
+                          className="p-3.5 bg-graphite ring-1 ring-white/[0.06] rounded-lg cursor-pointer hover:bg-[#232323] hover:ring-white/15 transition-all duration-300"
                           onClick={() => handleViewTask(t)}
                         >
                           <div className="flex justify-between items-start mb-1">
@@ -512,7 +559,7 @@ export default function MaintenancePage() {
                             {t.nextDueDate && <span className="ml-2"><span className="font-medium text-slate-300">A refaire:</span> {t.nextDueDate}</span>}
                           </div>
                           {t.autoCreated && (
-                            <div className="text-xs text-yellow-400 mt-1">⚡ Auto-created</div>
+                            <div className="text-xs text-signal mt-1">⚡ Auto-created</div>
                           )}
                         </div>
                       ))}
@@ -523,9 +570,10 @@ export default function MaintenancePage() {
                 </div>
 
                 {/* SCHEDULE - Not Urgent & Important (Quadrant 2) */}
-                <div className="p-4 bg-blue-950/20 border-2 border-blue-500/30 rounded-lg">
-                  <h3 className="text-blue-400 font-bold mb-3 flex items-center gap-2">
-                    <span className="text-xl">📅</span>
+                <div className="relative overflow-hidden rounded-[10px] bg-coal p-5 ring-1 ring-white/[0.06]">
+                  <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-signal" />
+                  <h3 className="text-white text-[15px] font-medium tracking-[-0.01em] mb-4 flex items-center gap-2">
+                    <span className="text-base">📅</span>
                     SCHEDULE (Not Urgent & Important)
                   </h3>
                   <div className="space-y-2">
@@ -535,7 +583,7 @@ export default function MaintenancePage() {
                       .map(t => (
                         <div
                           key={t.id}
-                          className="p-3 bg-slate-900/80 border border-slate-700 rounded cursor-pointer hover:bg-slate-800 transition-colors"
+                          className="p-3.5 bg-graphite ring-1 ring-white/[0.06] rounded-lg cursor-pointer hover:bg-[#232323] hover:ring-white/15 transition-all duration-300"
                           onClick={() => handleViewTask(t)}
                         >
                           <div className="flex justify-between items-start mb-1">
@@ -548,7 +596,7 @@ export default function MaintenancePage() {
                             {t.nextDueDate && <span className="ml-2"><span className="font-medium text-slate-300">A refaire:</span> {t.nextDueDate}</span>}
                           </div>
                           {t.autoCreated && (
-                            <div className="text-xs text-yellow-400 mt-1">⚡ Auto-created</div>
+                            <div className="text-xs text-signal mt-1">⚡ Auto-created</div>
                           )}
                         </div>
                       ))}
@@ -559,9 +607,10 @@ export default function MaintenancePage() {
                 </div>
 
                 {/* DELEGATE - Urgent & Not Important (Quadrant 3) */}
-                <div className="p-4 bg-yellow-950/20 border-2 border-yellow-500/30 rounded-lg">
-                  <h3 className="text-yellow-400 font-bold mb-3 flex items-center gap-2">
-                    <span className="text-xl">👥</span>
+                <div className="relative overflow-hidden rounded-[10px] bg-coal p-5 ring-1 ring-white/[0.06]">
+                  <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-white" />
+                  <h3 className="text-white text-[15px] font-medium tracking-[-0.01em] mb-4 flex items-center gap-2">
+                    <span className="text-base">👥</span>
                     DELEGATE (Urgent & Not Important)
                   </h3>
                   <div className="space-y-2">
@@ -571,7 +620,7 @@ export default function MaintenancePage() {
                       .map(t => (
                         <div
                           key={t.id}
-                          className="p-3 bg-slate-900/80 border border-slate-700 rounded cursor-pointer hover:bg-slate-800 transition-colors"
+                          className="p-3.5 bg-graphite ring-1 ring-white/[0.06] rounded-lg cursor-pointer hover:bg-[#232323] hover:ring-white/15 transition-all duration-300"
                           onClick={() => handleViewTask(t)}
                         >
                           <div className="flex justify-between items-start mb-1">
@@ -584,7 +633,7 @@ export default function MaintenancePage() {
                             {t.nextDueDate && <span className="ml-2"><span className="font-medium text-slate-300">A refaire:</span> {t.nextDueDate}</span>}
                           </div>
                           {t.autoCreated && (
-                            <div className="text-xs text-yellow-400 mt-1">⚡ Auto-created</div>
+                            <div className="text-xs text-signal mt-1">⚡ Auto-created</div>
                           )}
                         </div>
                       ))}
@@ -595,9 +644,10 @@ export default function MaintenancePage() {
                 </div>
 
                 {/* ELIMINATE - Not Urgent & Not Important (Quadrant 4) */}
-                <div className="p-4 bg-slate-950/40 border-2 border-slate-600/30 rounded-lg">
-                  <h3 className="text-slate-400 font-bold mb-3 flex items-center gap-2">
-                    <span className="text-xl">🗑️</span>
+                <div className="relative overflow-hidden rounded-[10px] bg-coal p-5 ring-1 ring-white/[0.06]">
+                  <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-slate-500" />
+                  <h3 className="text-slate-300 text-[15px] font-medium tracking-[-0.01em] mb-4 flex items-center gap-2">
+                    <span className="text-base">🗑️</span>
                     ELIMINATE (Not Urgent & Not Important)
                   </h3>
                   <div className="space-y-2">
@@ -607,7 +657,7 @@ export default function MaintenancePage() {
                       .map(t => (
                         <div
                           key={t.id}
-                          className="p-3 bg-slate-900/80 border border-slate-700 rounded cursor-pointer hover:bg-slate-800 transition-colors"
+                          className="p-3.5 bg-graphite ring-1 ring-white/[0.06] rounded-lg cursor-pointer hover:bg-[#232323] hover:ring-white/15 transition-all duration-300"
                           onClick={() => handleViewTask(t)}
                         >
                           <div className="flex justify-between items-start mb-1">
@@ -620,7 +670,7 @@ export default function MaintenancePage() {
                             {t.nextDueDate && <span className="ml-2"><span className="font-medium text-slate-300">A refaire:</span> {t.nextDueDate}</span>}
                           </div>
                           {t.autoCreated && (
-                            <div className="text-xs text-yellow-400 mt-1">⚡ Auto-created</div>
+                            <div className="text-xs text-signal mt-1">⚡ Auto-created</div>
                           )}
                         </div>
                       ))}
@@ -641,7 +691,7 @@ export default function MaintenancePage() {
                   showCost={true}
                 />
 
-                <Card className="border-slate-800 bg-slate-900/40">
+                <Card className="bg-coal">
                   <CardHeader>
                     <CardTitle className="text-lg">Cost Analysis Summary</CardTitle>
                     <CardDescription>
@@ -682,18 +732,18 @@ export default function MaintenancePage() {
                 {/* Task Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-slate-400">Priority</label>
+                    <label className="text-[13px] font-normal text-slate-400">Priority</label>
                     <div className="mt-1"><PriorityBadge priority={selectedTask.priority} /></div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-slate-400 flex items-center gap-1">
+                    <label className="text-[13px] font-normal text-slate-400 flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
                       Date à faire (Due)
                     </label>
                     <div className="mt-1 text-white">{selectedTask.dueDate}</div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-slate-400 flex items-center gap-1">
+                    <label className="text-[13px] font-normal text-slate-400 flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4 text-emerald-500" />
                       Date pour la refaire (Next)
                     </label>
@@ -703,8 +753,8 @@ export default function MaintenancePage() {
 
                 {/* Eisenhower Matrix Classification */}
                 {selectedTask.eisenhowerQuadrant && (
-                  <div className="p-4 bg-slate-900/60 border border-slate-700 rounded-lg">
-                    <label className="text-sm font-medium text-slate-400 block mb-2">
+                  <div className="p-4 bg-coal ring-1 ring-white/[0.06] rounded-[10px]">
+                    <label className="text-[13px] font-normal text-slate-400 block mb-2">
                       Eisenhower Matrix Classification
                     </label>
                     <div className="grid grid-cols-3 gap-3">
@@ -718,7 +768,7 @@ export default function MaintenancePage() {
                           <Badge variant="outline" className={
                             selectedTask.urgency === 'URGENT'
                               ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                              : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                              : 'bg-white/[0.04] text-slate-300 border-white/15'
                           }>
                             {selectedTask.urgency || 'N/A'}
                           </Badge>
@@ -729,8 +779,8 @@ export default function MaintenancePage() {
                         <div className="mt-1">
                           <Badge variant="outline" className={
                             selectedTask.importance === 'IMPORTANT'
-                              ? 'bg-purple-500/10 text-purple-400 border-purple-500/30'
-                              : 'bg-slate-500/10 text-slate-400 border-slate-500/30'
+                              ? 'bg-signal/10 text-signal border-signal/30'
+                              : 'bg-white/[0.04] text-slate-400 border-white/15'
                           }>
                             {selectedTask.importance || 'N/A'}
                           </Badge>
@@ -738,7 +788,7 @@ export default function MaintenancePage() {
                       </div>
                     </div>
                     {selectedTask.autoCreated && (
-                      <div className="mt-2 text-xs text-yellow-400 flex items-center gap-1">
+                      <div className="mt-2 text-xs text-signal flex items-center gap-1">
                         <span>⚡</span> Auto-created from AI anomaly detection
                       </div>
                     )}
@@ -747,14 +797,14 @@ export default function MaintenancePage() {
 
                 {/* Description */}
                 <div>
-                  <label className="text-sm font-medium text-slate-400">Description</label>
+                  <label className="text-[13px] font-normal text-slate-400">Description</label>
                   <p className="mt-1 text-white">{selectedTask.description}</p>
                 </div>
 
                 {/* AI Detected Cause */}
                 {selectedTask.aiDetectedCause && (
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                    <label className="text-sm font-medium text-yellow-400 flex items-center gap-2">
+                  <div className="p-4 bg-signal/[0.08] ring-1 ring-signal/30 rounded-[10px]">
+                    <label className="text-sm font-medium text-signal flex items-center gap-2">
                       <FileText className="w-4 h-4" />
                       AI Detected Cause
                     </label>
@@ -767,19 +817,19 @@ export default function MaintenancePage() {
 
                 {/* Assignment */}
                 <div>
-                  <label className="text-sm font-medium text-slate-400 flex items-center gap-1 mb-2">
+                  <label className="text-[13px] font-normal text-slate-400 flex items-center gap-1 mb-2">
                     <User className="w-4 h-4" />
                     Assign To
                   </label>
                   <Select value={assignTo} onValueChange={setAssignTo}>
-                    <SelectTrigger className="bg-slate-950 border-slate-800 text-white">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select technician" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-800">
-                      <SelectItem value="John Smith" className="text-white">John Smith</SelectItem>
-                      <SelectItem value="Mike Johnson" className="text-white">Mike Johnson</SelectItem>
-                      <SelectItem value="Sarah Williams" className="text-white">Sarah Williams</SelectItem>
-                      <SelectItem value="David Brown" className="text-white">David Brown</SelectItem>
+                    <SelectContent>
+                      <SelectItem value="John Smith">John Smith</SelectItem>
+                      <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
+                      <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                      <SelectItem value="David Brown">David Brown</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -787,7 +837,7 @@ export default function MaintenancePage() {
                 {/* Completion Notes (for DONE status) */}
                 {selectedTask.status === 'DONE' || selectedTask.completionNotes ? (
                   <div>
-                    <label className="text-sm font-medium text-slate-400 mb-2 block">
+                    <label className="text-[13px] font-normal text-slate-400 mb-2 block">
                       Completion Notes
                     </label>
                     {selectedTask.status === 'DONE' && !selectedTask.completionNotes ? (
@@ -798,7 +848,7 @@ export default function MaintenancePage() {
                         className="min-h-[100px]"
                       />
                     ) : (
-                      <p className="text-white text-sm p-3 bg-slate-900 rounded-md border border-slate-800">
+                      <p className="text-white text-sm p-3 bg-coal rounded-lg ring-1 ring-white/[0.06]">
                         {selectedTask.completionNotes}
                       </p>
                     )}
@@ -810,7 +860,7 @@ export default function MaintenancePage() {
                   </div>
                 ) : selectedTask.status === 'IN_PROGRESS' ? (
                   <div>
-                    <label className="text-sm font-medium text-slate-400 mb-2 block">
+                    <label className="text-[13px] font-normal text-slate-400 mb-2 block">
                       Completion Notes (optional)
                     </label>
                     <Textarea
@@ -823,14 +873,14 @@ export default function MaintenancePage() {
                 ) : null}
               </div>
 
-              <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:items-center">
                 {/* Status Update Buttons */}
                 <div className="flex gap-2 flex-1">
                   {selectedTask.status === 'NOT_STARTED' && (
                     <Button
                       onClick={() => handleUpdateStatus('IN_PROGRESS')}
                       disabled={isUpdating || !assignTo}
-                      className="bg-emerald-600 hover:bg-emerald-700"
+                      variant="cta"
                     >
                       Start Task
                     </Button>
@@ -839,7 +889,7 @@ export default function MaintenancePage() {
                     <Button
                       onClick={() => handleUpdateStatus('DONE')}
                       disabled={isUpdating || !assignTo}
-                      className="bg-green-600 hover:bg-green-700"
+                      variant="cta-light"
                     >
                       Mark Complete
                     </Button>
@@ -855,10 +905,8 @@ export default function MaintenancePage() {
                 <Button
                   onClick={handleGenerateReport}
                   variant="outline"
-                  size="sm"
-                  className="bg-slate-800 hover:bg-slate-700 border-slate-700"
                 >
-                  <Download className="w-4 h-4 mr-2" />
+                  <Download className="w-4 h-4" />
                   Download PDF Report
                 </Button>
               </DialogFooter>
@@ -880,22 +928,22 @@ export default function MaintenancePage() {
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-slate-200">Titre de la tâche</Label>
+                <Label htmlFor="title">Titre de la tâche</Label>
                 <Input
                   id="title"
                   value={newTaskForm.title}
                   onChange={(e) => setNewTaskForm(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Ex: Remplacement du filtre"
-                  className="bg-slate-950 border-slate-800 text-white"
+                 
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="equipment" className="text-slate-200">Equipement</Label>
+                <Label htmlFor="equipment">Equipement</Label>
                 <Select value={newTaskForm.equipmentId} onValueChange={(val) => setNewTaskForm(prev => ({ ...prev, equipmentId: val }))}>
-                  <SelectTrigger className="bg-slate-950 border-slate-800 text-white">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Choisir un équipement" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                  <SelectContent>
                     <SelectItem value="PRESS_001">PRESS_001</SelectItem>
                     <SelectItem value="CONV_014">CONV_014</SelectItem>
                     <SelectItem value="MOTOR_207">MOTOR_207</SelectItem>
@@ -907,32 +955,32 @@ export default function MaintenancePage() {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="dueDate" className="text-slate-200">Date à faire</Label>
+                <Label htmlFor="dueDate">Date à faire</Label>
                 <Input
                   id="dueDate"
                   type="date"
                   value={newTaskForm.dueDate}
                   onChange={(e) => setNewTaskForm(prev => ({ ...prev, dueDate: e.target.value }))}
-                  className="bg-slate-950 border-slate-800 text-white"
+                 
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="nextDueDate" className="text-slate-200">A refaire le</Label>
+                <Label htmlFor="nextDueDate">A refaire le</Label>
                 <Input
                   id="nextDueDate"
                   type="date"
                   value={newTaskForm.nextDueDate}
                   onChange={(e) => setNewTaskForm(prev => ({ ...prev, nextDueDate: e.target.value }))}
-                  className="bg-slate-950 border-slate-800 text-white"
+                 
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="priority" className="text-slate-200">Priorité</Label>
+                <Label htmlFor="priority">Priorité</Label>
                 <Select value={newTaskForm.priority} onValueChange={(val) => setNewTaskForm(prev => ({ ...prev, priority: val }))}>
-                  <SelectTrigger className="bg-slate-950 border-slate-800 text-white">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                  <SelectContent>
                     <SelectItem value="LOW">Basse (LOW)</SelectItem>
                     <SelectItem value="MEDIUM">Moyenne (MEDIUM)</SelectItem>
                     <SelectItem value="HIGH">Haute (HIGH)</SelectItem>
@@ -942,12 +990,12 @@ export default function MaintenancePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="assignedTo" className="text-slate-200">Assigner au technicien (Optionnel)</Label>
+              <Label htmlFor="assignedTo">Assigner au technicien (Optionnel)</Label>
               <Select value={newTaskForm.assignedTo} onValueChange={(val) => setNewTaskForm(prev => ({ ...prev, assignedTo: val }))}>
-                <SelectTrigger className="bg-slate-950 border-slate-800 text-white">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Non assigné" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                <SelectContent>
                   <SelectItem value="John Smith">John Smith</SelectItem>
                   <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
                   <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
@@ -957,43 +1005,43 @@ export default function MaintenancePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="desc" className="text-slate-200">Description</Label>
+              <Label htmlFor="desc">Description</Label>
               <Textarea
                 id="desc"
                 value={newTaskForm.description}
                 onChange={(e) => setNewTaskForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Détails de l'intervention..."
-                className="bg-slate-950 border-slate-800 text-white min-h-[100px]"
+                className="min-h-[100px]"
               />
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateOpen(false)} className="bg-transparent text-slate-300 border-slate-700 hover:bg-slate-800">
+          <DialogFooter className="gap-3">
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
               Annuler
             </Button>
-            <Button onClick={handleCreateTask} disabled={isCreating} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button onClick={handleCreateTask} disabled={isCreating} variant="cta">
               {isCreating ? "Création..." : "Créer la tâche"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Planning Notes</CardTitle>
-          <CardDescription>Guidelines for scheduling maintenance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-disc list-inside text-slate-300 space-y-1">
+      <NotchCard tab="quote" className="rounded-[6px] px-6 pb-16 pt-16 sm:px-12">
+        <div>
+          <h2 className="text-2xl font-normal tracking-[-0.02em]">Planning Notes</h2>
+          <p className="mt-1 text-sm text-neutral-800/80">Guidelines for scheduling maintenance</p>
+        </div>
+        <div className="mt-6">
+          <ul className="list-disc list-inside space-y-2 text-[15px] font-medium leading-relaxed text-neutral-900 marker:text-neutral-900/50">
             <li>Prioritize HIGH tasks within 72 hours.</li>
             <li>Group tasks by equipment to minimize downtime.</li>
             <li>Verify parts availability before scheduling replacements.</li>
             <li>Record outcomes and update the next maintenance cycle.</li>
             <li>Review AI-detected causes to improve predictive models.</li>
           </ul>
-        </CardContent>
-      </Card>
+        </div>
+      </NotchCard>
     </div>
   )
 }

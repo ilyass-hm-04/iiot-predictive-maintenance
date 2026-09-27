@@ -24,7 +24,7 @@ export default function PatternAnalysis({ patterns }: PatternAnalysisProps) {
     switch (severity) {
       case 'HIGH': return { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-500', icon: 'text-red-500' }
       case 'MEDIUM': return { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500', icon: 'text-yellow-500' }
-      case 'LOW': return { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', icon: 'text-blue-500' }
+      case 'LOW': return { bg: 'bg-white/[0.04]', border: 'border-white/15', text: 'text-slate-300', icon: 'text-slate-300' }
       case 'INFO': return { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-500', icon: 'text-emerald-500' }
       default: return { bg: 'bg-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-500', icon: 'text-slate-500' }
     }

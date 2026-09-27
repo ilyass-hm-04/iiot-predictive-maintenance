@@ -62,7 +62,7 @@ export default function WorkOrderList({ workOrders }: WorkOrderListProps) {
     switch (priority) {
       case 'HIGH': return { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-500', badge: 'bg-red-500' }
       case 'MEDIUM': return { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500', badge: 'bg-yellow-500' }
-      case 'LOW': return { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', badge: 'bg-blue-500' }
+      case 'LOW': return { bg: 'bg-white/[0.04]', border: 'border-white/15', text: 'text-slate-300', badge: 'bg-white/30' }
       default: return { bg: 'bg-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-500', badge: 'bg-slate-500' }
     }
   }
@@ -70,7 +70,7 @@ export default function WorkOrderList({ workOrders }: WorkOrderListProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'COMPLETED': return 'text-emerald-500'
-      case 'IN_PROGRESS': return 'text-blue-500'
+      case 'IN_PROGRESS': return 'text-slate-300'
       case 'OPEN': return 'text-yellow-500'
       case 'SCHEDULED': return 'text-slate-500'
       default: return 'text-slate-500'
@@ -200,7 +200,7 @@ export default function WorkOrderList({ workOrders }: WorkOrderListProps) {
                       value={hoursWorked}
                       onChange={(e) => setHoursWorked(e.target.value)}
                       placeholder="e.g., 3.5"
-                      className="w-full px-3 sm:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-signal"
                     />
                     <p className="text-xs text-slate-500 mt-1">
                       Estimated: {modal.workOrder?.estimated_hours}h
@@ -215,7 +215,7 @@ export default function WorkOrderList({ workOrders }: WorkOrderListProps) {
                       onChange={(e) => setCompletionNotes(e.target.value)}
                       placeholder="Describe work performed, parts replaced, observations..."
                       rows={3}
-                      className="w-full px-3 sm:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="w-full px-3 sm:px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-signal resize-none"
                     />
                   </div>
                 </div>
@@ -233,7 +233,7 @@ export default function WorkOrderList({ workOrders }: WorkOrderListProps) {
               {modal.type === 'start' && (
                 <button
                   onClick={handleStartWork}
-                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-neutral-950 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                   <PlayCircle className="w-4 h-4" />
                   Start Work
@@ -242,7 +242,7 @@ export default function WorkOrderList({ workOrders }: WorkOrderListProps) {
               {modal.type === 'complete' && (
                 <button
                   onClick={handleCompleteWork}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex-1 px-4 py-2 bg-signal hover:bg-signal-strong text-neutral-950 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                   <CheckCircle className="w-4 h-4" />
                   Complete
@@ -320,7 +320,7 @@ export default function WorkOrderList({ workOrders }: WorkOrderListProps) {
               {order.status === 'OPEN' && (
                 <button
                   onClick={() => openModal('start', order)}
-                  className="flex-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-medium transition-colors flex items-center justify-center gap-1"
+                  className="flex-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-neutral-950 rounded text-xs font-medium transition-colors flex items-center justify-center gap-1"
                 >
                   <PlayCircle className="w-3 h-3" />
                   Start Work
@@ -330,7 +330,7 @@ export default function WorkOrderList({ workOrders }: WorkOrderListProps) {
               {order.status === 'IN_PROGRESS' && (
                 <button
                   onClick={() => openModal('complete', order)}
-                  className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium transition-colors flex items-center justify-center gap-1"
+                  className="flex-1 px-3 py-1.5 bg-signal hover:bg-signal-strong text-neutral-950 rounded text-xs font-medium transition-colors flex items-center justify-center gap-1"
                 >
                   <CheckCircle className="w-3 h-3" />
                   Complete

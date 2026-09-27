@@ -88,7 +88,7 @@ export default function MaintenanceForecast({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-blue-500" />
+            <Clock className="w-5 h-5 text-slate-300" />
             Maintenance Forecast
           </CardTitle>
           <Badge variant="outline" className={getUrgencyColor(daysUntilMaintenance)}>
@@ -139,7 +139,7 @@ export default function MaintenanceForecast({
         <Button
           onClick={handleAddToCalendar}
           disabled={isAdding}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-full bg-signal hover:bg-signal-strong text-neutral-950"
         >
           {isAdding ? (
             <>

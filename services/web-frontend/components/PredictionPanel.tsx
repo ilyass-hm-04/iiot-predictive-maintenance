@@ -93,11 +93,11 @@ export default function PredictionPanel({ equipmentId }: { equipmentId?: string 
 
   if (loading) {
     return (
-      <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+      <div className="bg-graphite ring-1 ring-white/[0.06] rounded-[10px] p-6 sm:p-7">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-slate-700 rounded w-1/3"></div>
-          <div className="h-4 bg-slate-700 rounded w-2/3"></div>
-          <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+          <div className="h-6 bg-white/[0.07] rounded-full w-1/3"></div>
+          <div className="h-4 bg-white/[0.07] rounded-full w-2/3"></div>
+          <div className="h-4 bg-white/[0.07] rounded-full w-1/2"></div>
         </div>
       </div>
     )
@@ -105,8 +105,8 @@ export default function PredictionPanel({ equipmentId }: { equipmentId?: string 
 
   if (error || !prediction) {
     return (
-      <div className="bg-slate-800/50 border border-red-500/30 rounded-xl p-6">
-        <div className="flex items-center gap-3 text-red-500">
+      <div className="bg-graphite ring-1 ring-red-500/30 rounded-[10px] p-6">
+        <div className="flex items-center gap-3 text-red-400">
           <AlertTriangle className="w-5 h-5" />
           <div>
             <p className="font-semibold">Prediction Service Unavailable</p>
@@ -122,11 +122,11 @@ export default function PredictionPanel({ equipmentId }: { equipmentId?: string 
   // Risk color mapping
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'CRITICAL': return 'text-red-500 bg-red-500/10 border-red-500/30'
-      case 'HIGH': return 'text-orange-500 bg-orange-500/10 border-orange-500/30'
-      case 'MEDIUM': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/30'
-      case 'LOW': return 'text-green-500 bg-green-500/10 border-green-500/30'
-      default: return 'text-slate-500 bg-slate-500/10 border-slate-500/30'
+      case 'CRITICAL': return 'text-red-400 bg-red-500/10 border-red-500/30'
+      case 'HIGH': return 'text-orange-400 bg-orange-500/10 border-orange-500/30'
+      case 'MEDIUM': return 'text-signal bg-signal/10 border-signal/30'
+      case 'LOW': return 'text-green-400 bg-green-500/10 border-green-500/30'
+      default: return 'text-slate-400 bg-white/[0.04] border-white/10'
     }
   }
 
@@ -143,25 +143,25 @@ export default function PredictionPanel({ equipmentId }: { equipmentId?: string 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 pt-2">
         <div className="flex items-center gap-3">
-          <Zap className="w-6 h-6 text-emerald-500" />
-          <h2 className="text-xl font-bold text-white">AI Predictions</h2>
+          <span className="flex size-10 items-center justify-center rounded-full bg-signal text-neutral-950"><Zap className="w-[18px] h-[18px]" /></span>
+          <h2 className="text-2xl font-normal tracking-[-0.02em] text-white">AI Predictions</h2>
         </div>
-        <div className={`px-3 py-1 rounded-lg border font-semibold text-sm ${getRiskColor(overall_assessment.risk_level)}`}>
+        <div className={`px-3 py-1 rounded-full border font-medium text-xs tracking-wide ${getRiskColor(overall_assessment.risk_level)}`}>
           {overall_assessment.risk_level}
         </div>
       </div>
 
       {/* Overall Assessment */}
-      <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+      <div className="bg-ink ring-1 ring-white/[0.06] rounded-[10px] p-6 sm:p-8">
         <div className="flex items-start gap-4">
-          <div className={`p-3 rounded-lg ${getRiskColor(overall_assessment.risk_level)}`}>
+          <div className={`p-3 rounded-full border ${getRiskColor(overall_assessment.risk_level)}`}>
             {getRiskIcon(overall_assessment.risk_level)}
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-white mb-2">Overall Assessment</h3>
-            <p className="text-slate-300 mb-3">{overall_assessment.recommendation}</p>
+            <h3 className="eyebrow text-[13px] text-slate-400 mb-3">Overall Assessment</h3>
+            <p className="text-xl font-normal leading-snug tracking-[-0.015em] text-white mb-3 sm:text-2xl">{overall_assessment.recommendation}</p>
             <p className="text-sm text-slate-400">{overall_assessment.analysis}</p>
           </div>
         </div>
@@ -169,31 +169,31 @@ export default function PredictionPanel({ equipmentId }: { equipmentId?: string 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Current State */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+        <div className="bg-graphite ring-1 ring-white/[0.06] rounded-[10px] p-6 sm:p-7">
           <div className="flex items-center gap-3 mb-4">
-            <Activity className="w-5 h-5 text-blue-500" />
-            <h3 className="text-lg font-semibold text-white">Real-time Detection</h3>
+            <span className="flex size-9 items-center justify-center rounded-full bg-white/[0.06]"><Activity className="w-4 h-4 text-slate-300" /></span>
+            <h3 className="text-xl font-normal tracking-[-0.02em] text-white">Real-time Detection</h3>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
+          <div>
+            <div className="spec-row">
               <span className="text-slate-400">Status</span>
-              <span className={`px-3 py-1 rounded-lg border font-semibold text-sm ${getRiskColor(current_state.risk_level)}`}>
+              <span className={`px-3 py-1 rounded-full border font-medium text-xs tracking-wide ${getRiskColor(current_state.risk_level)}`}>
                 {current_state.status}
               </span>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="spec-row">
               <span className="text-slate-400">Anomaly Score</span>
               <span className="text-white font-semibold">{current_state.anomaly_score}/100</span>
             </div>
 
             {Array.isArray(current_state.warnings) && current_state.warnings.length > 0 && (
               <div className="mt-4 space-y-2">
-                <p className="text-sm font-semibold text-slate-300">Warnings:</p>
+                <p className="text-[13px] text-slate-400">Warnings:</p>
                 {current_state.warnings.map((warning, idx) => (
-                  <div key={idx} className="flex items-start gap-2 text-sm text-slate-300 bg-slate-900/50 p-2 rounded">
-                    <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <div key={idx} className="flex items-start gap-2 text-sm text-slate-300 bg-coal ring-1 ring-white/[0.06] px-3 py-2.5 rounded-lg">
+                    <AlertTriangle className="w-4 h-4 text-signal mt-0.5 flex-shrink-0" />
                     <span>{warning}</span>
                   </div>
                 ))}
@@ -207,29 +207,29 @@ export default function PredictionPanel({ equipmentId }: { equipmentId?: string 
         </div>
 
         {/* Future Prediction */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+        <div className="bg-graphite ring-1 ring-white/[0.06] rounded-[10px] p-6 sm:p-7">
           <div className="flex items-center gap-3 mb-4">
-            <TrendingUp className="w-5 h-5 text-purple-500" />
-            <h3 className="text-lg font-semibold text-white">Future Forecast</h3>
+            <span className="flex size-9 items-center justify-center rounded-full bg-white/[0.06]"><TrendingUp className="w-4 h-4 text-slate-300" /></span>
+            <h3 className="text-xl font-normal tracking-[-0.02em] text-white">Future Forecast</h3>
           </div>
 
           {future_prediction.model_loaded ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
+            <div>
+              <div className="spec-row">
                 <span className="text-slate-400">Risk Level</span>
-                <span className={`px-3 py-1 rounded-lg border font-semibold text-sm ${getRiskColor(future_prediction.future_risk_level)}`}>
+                <span className={`px-3 py-1 rounded-full border font-medium text-xs tracking-wide ${getRiskColor(future_prediction.future_risk_level)}`}>
                   {future_prediction.future_risk_emoji} {future_prediction.future_risk_level}
                 </span>
               </div>
 
               {future_prediction.predicted_mttf !== null && (
                 <>
-                  <div className="flex items-center justify-between">
+                  <div className="spec-row">
                     <span className="text-slate-400">Predicted MTTF</span>
                     <span className="text-white font-semibold">{future_prediction.predicted_mttf.toFixed(2)} hrs</span>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="spec-row">
                     <span className="text-slate-400">Time to Failure</span>
                     <span className="text-white font-semibold flex items-center gap-1">
                       <Clock className="w-4 h-4" />
@@ -240,18 +240,18 @@ export default function PredictionPanel({ equipmentId }: { equipmentId?: string 
               )}
 
               {future_prediction.most_critical_factor && (
-                <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
-                  <p className="text-xs text-slate-400 mb-1">Most Critical Factor</p>
-                  <p className="text-sm font-semibold text-white">
+                <div className="mt-4 p-4 bg-signal text-neutral-950 rounded-lg dot-grid">
+                  <p className="text-xs text-neutral-800/80 mb-1">Most Critical Factor</p>
+                  <p className="text-lg font-medium">
                     {future_prediction.most_critical_factor.name}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-neutral-800/80">
                     Importance: {future_prediction.most_critical_factor.importance.toFixed(1)}%
                   </p>
                 </div>
               )}
 
-              <div className="mt-4 pt-4 border-t border-slate-700">
+              <div className="mt-4 pt-4 border-t border-white/[0.08]">
                 <p className="text-sm text-slate-300">{future_prediction.recommended_action}</p>
                 {future_prediction.confidence && (
                   <p className="text-xs text-slate-500 mt-2">Confidence: {future_prediction.confidence}</p>
@@ -259,7 +259,7 @@ export default function PredictionPanel({ equipmentId }: { equipmentId?: string 
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3 text-yellow-500">
+            <div className="flex items-center gap-3 text-signal">
               <AlertTriangle className="w-5 h-5" />
               <div>
                 <p className="font-semibold">Model Not Loaded</p>

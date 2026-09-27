@@ -2,144 +2,182 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Github, Star } from 'lucide-react'
+import { ArrowUpRight, Github, Star } from 'lucide-react'
+import { NotchCard, Eyebrow } from '@/components/design'
+
+const ease = [0.2, 0.7, 0.1, 1] as const
+
+function RiseLine({ children, delay }: { children: React.ReactNode; delay: number }) {
+  return (
+    <span className="block overflow-hidden pb-[0.08em]">
+      <motion.span
+        className="block"
+        initial={{ y: '110%' }}
+        animate={{ y: 0 }}
+        transition={{ delay, duration: 1, ease }}
+      >
+        {children}
+      </motion.span>
+    </span>
+  )
+}
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-20 overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent" />
-      
-      {/* Content */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="relative z-10 max-w-5xl mx-auto text-center"
-      >
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+    <>
+      {/* Hero */}
+      <section className="relative flex min-h-[100svh] items-end overflow-hidden bg-[linear-gradient(100deg,#0b0b0b_0%,#262626_38%,#5e5e5e_68%,#8f8f8f_100%)] md:items-center">
+        {/* Machine illustration */}
+        <motion.img
+          src="/visuals/hero-spindle.svg"
+          alt=""
+          aria-hidden="true"
+          initial={{ opacity: 0, scale: 1.06 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8"
-        >
-          <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-sm text-zinc-400 font-medium">Open Source • MIT License</span>
-        </motion.div>
+          transition={{ duration: 1.6, ease }}
+          className="pointer-events-none absolute left-[-30%] top-0 h-[78%] w-auto max-w-none select-none [mask-image:linear-gradient(to_right,black_55%,transparent_98%)] sm:left-[-12%] md:left-[-14%] md:h-full lg:left-[-8%] xl:left-0"
+        />
+        {/* Architectural hairlines */}
+        <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none">
+          <line x1="44%" y1="0" x2="44%" y2="100%" stroke="white" strokeOpacity=".12" />
+          <line x1="0" y1="62%" x2="100%" y2="62%" stroke="white" strokeOpacity=".10" />
+          <line x1="66%" y1="0" x2="100%" y2="38%" stroke="white" strokeOpacity=".22" />
+          <line x1="8%" y1="70%" x2="30%" y2="100%" stroke="white" strokeOpacity=".14" />
+        </svg>
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-black/10" />
 
-        {/* Headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-tighter mb-6 bg-gradient-to-b from-white via-white to-white/50 bg-clip-text text-transparent leading-[1.1]"
-        >
-          Predictive Maintenance
-          <br />
-          for the Modern Factory.
-        </motion.h1>
+        {/* Content */}
+        <div className="relative z-10 mx-auto w-full max-w-[1400px] px-4 pb-14 pt-32 sm:px-8 md:pb-0 md:pt-24">
+          <div className="md:ml-auto md:w-[50%] lg:w-[46%]">
+            {/* Headline */}
+            <h1 className="display text-[44px] text-white sm:text-6xl lg:text-[64px] xl:text-[76px]">
+              <RiseLine delay={1.6}>Predictive Maintenance</RiseLine>
+              <RiseLine delay={1.72}>for the Modern Factory.</RiseLine>
+            </h1>
 
-        {/* Subtext */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 mb-12 max-w-3xl mx-auto leading-relaxed px-4"
-        >
-          Stop downtime before it happens. The open-source standard for IIoT anomaly detection.
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
-        >
-          <Link
-            href="/dashboard"
-            className="group px-8 py-4 bg-white text-black font-semibold rounded-full hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-2xl shadow-white/20"
-          >
-            Enter Console
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-          <Link
-            href="https://github.com/H0ussamCl4p/iiot-predictive-maintenance"
-            target="_blank"
-            className="group px-8 py-4 bg-zinc-900 text-white font-semibold rounded-full hover:bg-zinc-800 transition-all border border-zinc-700 flex items-center gap-2"
-          >
-            <Github className="w-5 h-5" />
-            View on GitHub
-            <div className="flex items-center gap-1 ml-2 px-2 py-1 bg-zinc-800 rounded-full text-xs">
-              <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
-              <span>42</span>
-            </div>
-          </Link>
-        </motion.div>
-      </motion.div>
-
-      {/* 3D Dashboard Mockup */}
-      <motion.div
-        initial={{ opacity: 0, y: 40, rotateX: 20 }}
-        animate={{ opacity: 1, y: 0, rotateX: 8 }}
-        transition={{ delay: 0.6, duration: 1 }}
-        className="relative z-10 w-full max-w-6xl mx-auto perspective-1000 px-4"
-      >
-        <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-emerald-500/20 bg-zinc-900/50 backdrop-blur-xl transform-gpu" style={{ transform: 'rotateX(8deg) rotateY(0deg)' }}>
-          {/* Glow Effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-purple-500/20 rounded-2xl md:rounded-3xl blur-2xl opacity-50" />
-          
-          {/* Browser Chrome */}
-          <div className="relative bg-zinc-950/80 backdrop-blur-xl border-b border-white/10 px-3 md:px-4 py-2 md:py-3 flex items-center gap-2">
-            <div className="flex gap-1.5 md:gap-2">
-              <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-red-500/80" />
-              <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-green-500/80" />
-            </div>
-            <div className="flex-1 ml-2 md:ml-4">
-              <div className="px-2 md:px-4 py-1 md:py-1.5 bg-white/5 rounded-lg text-[10px] md:text-xs text-zinc-500 font-mono truncate">
-                https://smart-energy-guardien.io/dashboard
-              </div>
-            </div>
-          </div>
-
-          {/* Dashboard Preview */}
-          <div className="relative bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 p-4 md:p-6 lg:p-8">
-            <div className="grid grid-cols-3 gap-2 md:gap-4">
-              {/* Stat Cards */}
-              <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
-                <div className="text-sm text-zinc-500 mb-2">Uptime</div>
-                <div className="text-4xl font-bold text-emerald-500">99.9%</div>
-              </div>
-              <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
-                <div className="text-sm text-zinc-500 mb-2">Devices</div>
-                <div className="text-4xl font-bold text-blue-500">847</div>
-              </div>
-              <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
-                <div className="text-sm text-zinc-500 mb-2">Alerts</div>
-                <div className="text-4xl font-bold text-orange-500">3</div>
-              </div>
-            </div>
-
-            {/* Chart Placeholder */}
-            <div className="mt-3 md:mt-6 h-40 md:h-52 lg:h-64 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 p-3 md:p-6 relative overflow-hidden">
-              <div className="absolute inset-0 flex items-end justify-around p-3 md:p-6">
-                {[40, 60, 55, 75, 65, 85, 70, 90].map((height, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ scaleY: 0 }}
-                    animate={{ scaleY: 1 }}
-                    transition={{ delay: 0.8 + i * 0.1 }}
-                    className="w-6 md:w-10 lg:w-12 bg-gradient-to-t from-emerald-500/50 to-emerald-500 rounded-t-md lg:rounded-t-lg origin-bottom"
-                    style={{ height: `${height}%` }}
-                  />
-                ))}
-              </div>
-            </div>
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.0, duration: 0.8, ease }}
+              className="mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center"
+            >
+              <Link href="/dashboard" className="group inline-flex items-center gap-1">
+                <span className="inline-flex h-12 items-center rounded-full bg-signal px-7 text-[15px] font-medium text-neutral-950 transition-colors group-hover:bg-signal-strong">
+                  Enter Console
+                </span>
+                <span className="inline-flex size-12 items-center justify-center rounded-full bg-signal text-neutral-950 transition-all duration-300 group-hover:rotate-45 group-hover:bg-signal-strong">
+                  <ArrowUpRight className="size-4" />
+                </span>
+              </Link>
+              <Link
+                href="https://github.com/H0ussamCl4p/iiot-predictive-maintenance"
+                target="_blank"
+                className="group inline-flex h-12 items-center gap-2 rounded-full border border-white/25 bg-black/20 pl-5 pr-2 text-[15px] font-medium text-white backdrop-blur-md transition-colors hover:border-white/60"
+              >
+                <Github className="size-4" />
+                View on GitHub
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs text-neutral-950">
+                  <Star className="size-3 fill-signal text-signal" />
+                  <span>42</span>
+                </span>
+              </Link>
+            </motion.div>
           </div>
         </div>
-      </motion.div>
-    </section>
+      </section>
+
+      {/* Intro + dashboard snapshot */}
+      <section className="bg-white text-neutral-950">
+        <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-8 sm:py-28">
+          <div className="grid gap-6 md:grid-cols-[1fr_1.4fr] md:gap-12">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <Eyebrow className="text-neutral-800">Open Source • MIT License</Eyebrow>
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease }}
+              className="text-2xl font-normal leading-snug tracking-[-0.015em] text-neutral-900 sm:text-[28px]"
+            >
+              Stop downtime before it happens. The open-source standard for IIoT anomaly detection.
+            </motion.p>
+          </div>
+
+          <p className="mt-16 font-mono text-[11px] tracking-wide text-neutral-400">https://smart-energy-guardien.io/dashboard</p>
+
+          {/* Stat cards */}
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3 md:items-end">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease }}
+            >
+              <NotchCard tab="left" className="flex h-[320px] flex-col justify-between rounded-[6px] p-7 sm:h-[360px]">
+                <div className="text-5xl font-normal tracking-[-0.03em] sm:text-6xl">99.9%</div>
+                <div>
+                  <div className="text-lg font-medium">Uptime</div>
+                  <div className="mt-1 text-sm text-neutral-800/80">System availability across the fleet</div>
+                </div>
+              </NotchCard>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1, duration: 0.8, ease }}
+              className="group relative h-[300px] overflow-hidden rounded-[6px] bg-neutral-900 sm:h-[320px]"
+            >
+              <img
+                src="/visuals/turbine-core.svg"
+                alt=""
+                aria-hidden="true"
+                className="absolute left-1/2 top-1/2 w-[120%] max-w-none -translate-x-1/2 -translate-y-[58%] opacity-80 transition-transform duration-[1.4s] ease-out group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-7 text-white">
+                <div className="text-5xl font-normal tracking-[-0.03em]">847</div>
+                <div className="mt-2 text-lg font-medium">Devices</div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.8, ease }}
+            >
+              <NotchCard tab="right" className="flex h-[300px] flex-col justify-between rounded-[6px] p-7 pt-14 sm:h-[330px]">
+                <div className="flex h-32 items-end justify-center gap-2.5">
+                  {[40, 60, 55, 75, 65, 85, 70, 90].map((height, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scaleY: 0 }}
+                      whileInView={{ scaleY: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.4 + i * 0.08, duration: 0.6, ease }}
+                      className="w-4 origin-bottom rounded-t-[3px] border-[2.5px] border-b-0 border-neutral-950 sm:w-5"
+                      style={{ height: `${height}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-medium">Alerts</div>
+                  <div className="text-4xl font-normal tracking-[-0.03em]">3</div>
+                </div>
+              </NotchCard>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }

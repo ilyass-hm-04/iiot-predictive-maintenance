@@ -10,10 +10,10 @@ interface StatusBadgeProps {
 export default function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
   const statusConfig = {
     NORMAL: {
-      color: 'bg-emerald-500',
-      text: 'text-emerald-500',
-      border: 'border-emerald-500',
-      glow: 'shadow-emerald-500/50'
+      color: 'bg-green-500',
+      text: 'text-green-500',
+      border: 'border-green-500',
+      glow: 'shadow-green-500/50'
     },
     WARNING: {
       color: 'bg-yellow-500',

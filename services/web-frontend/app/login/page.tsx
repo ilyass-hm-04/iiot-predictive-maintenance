@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, Lock, Shield, ArrowRight } from "lucide-react";
+import { Lock, Shield, ArrowRight, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { authUrl } from "@/lib/api-config";
+import { Brand, Eyebrow } from "@/components/design";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,53 +52,84 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-6 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-purple-500/5" />
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-      </div>
+    <div className="relative min-h-screen overflow-hidden bg-ink text-white">
+      {/* Machinery backdrop */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[url('/visuals/machine-bay.svg')] bg-cover bg-center opacity-70 grayscale-[35%]"
+      />
+      <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/30" />
+      <div aria-hidden="true" className="hairlines absolute inset-0 opacity-60" />
 
-      {/* Main Content */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="max-w-md w-full relative z-10"
-      >
-        {/* Logo/Brand */}
-        <div className="text-center mb-6 sm:mb-8">
-          <Link href="/" className="inline-flex items-center justify-center space-x-2 mb-3 sm:mb-4 group">
-            <Activity className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-500 group-hover:scale-110 transition-transform" />
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight">Smart Energy Guardien</span>
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-[1400px] flex-col px-4 py-4 sm:px-8 sm:py-6">
+        {/* Top bar */}
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="flex h-12 items-center rounded-full border border-white/[0.08] bg-ink/85 pl-2.5 pr-5 backdrop-blur-xl transition-colors hover:border-white/25"
+          >
+            <Brand />
           </Link>
-          <p className="text-zinc-400 text-base sm:text-lg px-4">
-            Welcome back to the future of maintenance
-          </p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Link
+              href="/"
+              className="group inline-flex h-12 items-center gap-2 whitespace-nowrap rounded-full bg-white px-4 text-sm font-medium text-neutral-950 sm:px-5 transition-colors hover:bg-neutral-200"
+            >
+              <ArrowRight className="size-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+              Back to home
+            </Link>
+          </motion.div>
         </div>
 
-        {/* Login Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="relative"
-        >
-          {/* Glow Effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-50" />
-          
-          <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-            <div className="flex items-center justify-center mb-6">
-              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                <Lock className="w-8 h-8 text-emerald-500" />
+        {/* Content */}
+        <div className="grid flex-1 items-end gap-10 py-10 lg:grid-cols-[1fr_minmax(0,500px)] lg:items-center lg:gap-16">
+          {/* Headline */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.2, 0.7, 0.1, 1] }}
+            className="order-2 lg:order-1 lg:self-end lg:pb-6"
+          >
+            <p className="display max-w-xl text-4xl text-white sm:text-5xl lg:text-6xl">
+              Welcome back to the future of maintenance
+            </p>
+
+            {/* Security Badge */}
+            <div className="mt-8 flex max-w-md items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/10">
+                <Shield className="size-[18px]" />
+              </span>
+              <div>
+                <p className="text-sm font-medium text-white">Enterprise Security</p>
+                <p className="mt-1 text-sm text-slate-300">
+                  Protected by JWT authentication with end-to-end encryption
+                </p>
               </div>
             </div>
+          </motion.div>
 
-            <h2 className="text-3xl font-bold text-center mb-2 tracking-tight">
+          {/* Login Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.8, ease: [0.2, 0.7, 0.1, 1] }}
+            className="order-1 rounded-2xl bg-white p-7 text-neutral-950 shadow-[0_40px_120px_-40px_rgba(0,0,0,.9)] sm:p-10 lg:order-2"
+          >
+            <div className="mb-8 flex items-center justify-between">
+              <Eyebrow className="text-neutral-500">Console access</Eyebrow>
+              <span className="flex size-10 items-center justify-center rounded-full bg-neutral-950 text-white">
+                <Lock className="size-4" />
+              </span>
+            </div>
+
+            <h2 className="display text-4xl sm:text-[44px]">
               Sign In
             </h2>
-            <p className="text-center text-zinc-400 mb-8">
+            <p className="mt-3 text-[15px] text-neutral-500">
               Access your industrial intelligence platform
             </p>
 
@@ -106,99 +138,78 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6 bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl text-sm backdrop-blur-sm"
+                role="alert"
+                className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
               >
                 {error}
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                <label htmlFor="username" className="block text-[13px] text-neutral-500">
                   Username
                 </label>
                 <input
+                  id="username"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 bg-zinc-950 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                  className="field-line"
                   placeholder="Enter your username"
+                  autoComplete="username"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                <label htmlFor="password" className="block text-[13px] text-neutral-500">
                   Password
                 </label>
                 <input
+                  id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-zinc-950 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                  className="field-line"
                   placeholder="Enter your password"
+                  autoComplete="current-password"
                   required
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="group w-full py-3.5 mt-4 bg-white text-black font-semibold rounded-full hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/20"
-              >
-                {loading ? (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-black border-t-transparent rounded-full"
-                    />
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    Sign In
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Security Badge */}
-            <div className="mt-8 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-emerald-500/10">
-                  <Shield className="h-5 w-5 text-emerald-500" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-white text-sm mb-1">
-                    Enterprise Security
-                  </p>
-                  <p className="text-xs text-zinc-400">
-                    Protected by JWT authentication with end-to-end encryption
-                  </p>
-                </div>
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group inline-flex items-center gap-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <span className="inline-flex h-12 items-center gap-2 rounded-full bg-neutral-950 px-7 text-sm font-medium text-white transition-colors group-hover:bg-neutral-800">
+                    {loading ? (
+                      <>
+                        <motion.span
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="size-4 rounded-full border-2 border-white border-t-transparent"
+                        />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="inline-flex size-12 items-center justify-center rounded-full bg-neutral-950 text-white transition-all duration-300 group-hover:rotate-45 group-hover:bg-neutral-800"
+                  >
+                    <ArrowUpRight className="size-4" />
+                  </span>
+                </button>
               </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Back to Home */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-8 text-center"
-        >
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors group"
-          >
-            <ArrowRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-            Back to home
-          </Link>
-        </motion.div>
-      </motion.div>
+            </form>
+          </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

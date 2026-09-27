@@ -13,7 +13,8 @@ import {
   Clock,
   FileText,
   Activity,
-  MessageSquare
+  MessageSquare,
+  ArrowUpRight
 } from "lucide-react"
 
 const items = [
@@ -38,10 +39,7 @@ export default function DashboardNav({ mobile = false, onNavigate }: DashboardNa
   const pathname = usePathname()
 
   return (
-    <nav className={cn(
-      "flex flex-col gap-1",
-      mobile ? "space-y-1" : "p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm"
-    )}>
+    <nav className={cn("flex flex-col", mobile && "sm:grid sm:grid-cols-2 sm:gap-x-8")}>
       {items.map((item) => {
         const active = pathname === item.href
         const Icon = item.icon
@@ -51,21 +49,31 @@ export default function DashboardNav({ mobile = false, onNavigate }: DashboardNa
             key={item.href}
             href={item.href}
             onClick={onNavigate}
+            data-active={active}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group",
-              active
-                ? "bg-white text-black shadow-lg"
-                : "text-zinc-400 hover:text-white hover:bg-white/10"
+              "rail-row group flex items-center gap-3.5 border-b border-white/[0.08] py-3 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60 focus-visible:ring-offset-2 focus-visible:ring-offset-coal",
+              active ? "text-white" : "text-slate-500 hover:text-white"
             )}
           >
-            <Icon className={cn(
-              "w-5 h-5 transition-colors",
-              active ? "text-emerald-600" : "text-zinc-500 group-hover:text-emerald-500"
-            )} />
-            <span className="text-sm">{item.label}</span>
-            {active && (
-              <div className="ml-auto w-2 h-2 rounded-full bg-emerald-500" />
-            )}
+            {/* Thumbnail tile */}
+            <span
+              className={cn(
+                "flex size-9 shrink-0 items-center justify-center rounded-[6px] transition-all duration-300",
+                active
+                  ? "bg-signal text-neutral-950"
+                  : "bg-gradient-to-br from-[#2c2c2c] to-[#141414] text-slate-500 ring-1 ring-white/[0.06] group-hover:text-white"
+              )}
+            >
+              <Icon className="size-4" />
+            </span>
+            <span className="text-[15px] font-medium tracking-[-0.01em]">{item.label}</span>
+            <ArrowUpRight
+              className={cn(
+                "ml-auto size-4 transition-all duration-300",
+                active ? "opacity-100" : "-translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+              )}
+            />
           </Link>
         )
       })}

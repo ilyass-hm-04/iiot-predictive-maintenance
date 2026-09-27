@@ -24,9 +24,9 @@ export default function LiveChart({ data }: LiveChartProps) {
       const value = payload[0].value
       const status = data[payload[0].dataKeyIndex || 0]?.status || ''
       return (
-        <div className="p-2 bg-slate-900/90 border border-slate-700 rounded-md">
-          <div className="text-xs text-slate-400">{label}</div>
-          <div className="text-sm text-white">AI Health: {value}%</div>
+        <div className="rounded-[10px] bg-white px-3 py-2 shadow-[0_20px_50px_-20px_rgba(0,0,0,.8)]">
+          <div className="text-[11px] text-neutral-500">{label}</div>
+          <div className="text-sm font-medium text-neutral-950">AI Health: {value}%</div>
         </div>
       )
     }
@@ -36,36 +36,38 @@ export default function LiveChart({ data }: LiveChartProps) {
   return (
     <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <AreaChart data={chartData} margin={{ top: 10, right: 44, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+              <stop offset="0%" stopColor="#f7cf49" stopOpacity={0.35}/>
+              <stop offset="100%" stopColor="#f7cf49" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+          <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.06)" />
           <XAxis 
             dataKey="time" 
-            stroke="#64748b"
-            tick={{ fill: '#94a3b8' }}
-            tickLine={{ stroke: '#334155' }}
+            stroke="rgba(255,255,255,0.12)"
+            tick={{ fill: '#7a7a7a', fontSize: 11 }}
+            tickLine={false}
+            minTickGap={24}
           />
           <YAxis 
-            stroke="#64748b"
-            tick={{ fill: '#94a3b8' }}
-            tickLine={{ stroke: '#334155' }}
+            stroke="rgba(255,255,255,0.12)"
+            tick={{ fill: '#7a7a7a', fontSize: 11 }}
+            tickLine={false}
+            axisLine={false}
             domain={[0, 100]}
-            label={{ value: 'AI Health (%)', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
+            label={{ value: 'AI Health (%)', angle: -90, position: 'insideLeft', fill: '#7a7a7a', fontSize: 11 }}
           />
-          <Tooltip content={renderTooltip} />
-          <Legend wrapperStyle={{ color: '#94a3b8' }} />
+          <Tooltip content={renderTooltip} cursor={{ stroke: 'rgba(255,255,255,0.25)', strokeDasharray: '3 3' }} />
+          <Legend wrapperStyle={{ color: '#9a9a9a', fontSize: 12 }} />
           {/* Threshold bands */}
-          <ReferenceLine y={10} label={{ value: 'Anomaly', position: 'right', fill: '#ef4444', fontSize: 12 }} stroke="#ef4444" strokeDasharray="4 4" />
-          <ReferenceLine y={30} label={{ value: 'Warning', position: 'right', fill: '#f59e0b', fontSize: 12 }} stroke="#f59e0b" strokeDasharray="4 4" />
+          <ReferenceLine y={10} label={{ value: 'Anomaly', position: 'right', fill: '#f87171', fontSize: 11 }} stroke="#ef4444" strokeOpacity={0.7} strokeDasharray="4 4" />
+          <ReferenceLine y={30} label={{ value: 'Warning', position: 'right', fill: '#fbbf24', fontSize: 11 }} stroke="#fbbf24" strokeOpacity={0.6} strokeDasharray="4 4" />
           <Area 
             type="monotone" 
             dataKey="score" 
-            stroke="#10b981" 
+            stroke="#f7cf49" 
             strokeWidth={2}
             isAnimationActive={false}
             fillOpacity={1} 

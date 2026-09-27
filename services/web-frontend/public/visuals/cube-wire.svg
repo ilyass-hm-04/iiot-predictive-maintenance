@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 200" fill="none">
+<defs></defs>
+<g stroke="#141414" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M60 50 L130 20 L200 50 L200 140 L130 172 L60 140 Z"/>
+<path d="M60 50 L130 80 L200 50 M130 80 L130 172"/>
+<path d="M130 20 L130 110 M130 110 L60 140 M130 110 L200 140" stroke-dasharray="6 8"/>
+</g>
+</svg>

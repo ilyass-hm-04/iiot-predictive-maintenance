@@ -3,11 +3,62 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Design language: monochrome industrial.
+ * Ink blacks + graphite cards, pure white sections, a single warm-yellow accent.
+ * The neutral ramps (slate / zinc / gray / neutral) are unified into one graphite
+ * ramp and `emerald` (the former brand accent) is remapped to the yellow accent,
+ * so every existing utility class inherits the new palette consistently.
+ */
+@theme {
+  --color-ink: #0b0b0b;
+  --color-coal: #131313;
+  --color-graphite: #1b1b1b;
+  --color-iron: #242424;
+  --color-steel: #8a8a8a;
+  --color-signal: #f7cf49;
+  --color-signal-strong: #efc22e;
+
+  --color-slate-50: #fafafa;
+  --color-slate-100: #f2f2f2;
+  --color-slate-200: #e4e4e4;
+  --color-slate-300: #cfcfcf;
+  --color-slate-400: #9a9a9a;
+  --color-slate-500: #7a7a7a;
+  --color-slate-600: #555555;
+  --color-slate-700: #343434;
+  --color-slate-800: #262626;
+  --color-slate-900: #1b1b1b;
+  --color-slate-950: #131313;
+
+  --color-zinc-50: #fafafa;
+  --color-zinc-100: #f2f2f2;
+  --color-zinc-200: #e4e4e4;
+  --color-zinc-300: #cfcfcf;
+  --color-zinc-400: #9a9a9a;
+  --color-zinc-500: #7a7a7a;
+  --color-zinc-600: #555555;
+  --color-zinc-700: #343434;
+  --color-zinc-800: #262626;
+  --color-zinc-900: #1b1b1b;
+  --color-zinc-950: #131313;
+
+  --color-gray-400: #9a9a9a;
+  --color-gray-500: #7a7a7a;
+
+  --color-emerald-300: #fbe08c;
+  --color-emerald-400: #f9d766;
+  --color-emerald-500: #f7cf49;
+  --color-emerald-600: #efc22e;
+  --color-emerald-700: #d9ab17;
+
+  --font-display: var(--font-sans);
+  --animate-scroll: scroll 40s linear infinite;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -41,7 +92,6 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --animate-scroll: scroll 30s linear infinite;
 }
 
 @keyframes scroll {
@@ -50,106 +100,224 @@
   }
 }
 
+/* The application is dark-first; tokens describe the graphite surfaces. */
 :root {
+  color-scheme: dark;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #131313;
+  --foreground: #ffffff;
+  --card: #1b1b1b;
+  --card-foreground: #ffffff;
+  --popover: #1b1b1b;
+  --popover-foreground: #ffffff;
+  --primary: #f7cf49;
+  --primary-foreground: #111111;
+  --secondary: #242424;
+  --secondary-foreground: #ffffff;
+  --muted: #242424;
+  --muted-foreground: #8a8a8a;
+  --accent: #2a2a2a;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --border: rgb(255 255 255 / 0.08);
+  --input: rgb(255 255 255 / 0.14);
+  --ring: rgb(247 207 73 / 0.6);
+  --chart-1: #f7cf49;
+  --chart-2: #ffffff;
+  --chart-3: #8a8a8a;
+  --chart-4: #ef4444;
+  --chart-5: #f59e0b;
+  --sidebar: #131313;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #f7cf49;
+  --sidebar-primary-foreground: #111111;
+  --sidebar-accent: #242424;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 0.08);
+  --sidebar-ring: rgb(247 207 73 / 0.6);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+  }
+  ::selection {
+    background: var(--color-signal);
+    color: #111;
   }
 }
 
-/* Custom Scrollbar Styles */
+/* ---------- Signature components ---------- */
+@layer components {
+  /* Small section label: "● Applications" */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[13px] font-normal tracking-normal;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply block size-1.5 rounded-full bg-current;
+  }
+
+  /* Large, light display headline */
+  .display {
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+  }
+
+  /* Yellow "folder tab" cards with chamfered notches */
+  .notch-tab-left {
+    clip-path: polygon(0 0, 62% 0, calc(62% + 34px) 38px, 100% 38px, 100% 100%, 0 100%);
+  }
+  .notch-tab-right {
+    clip-path: polygon(0 38px, 18% 38px, calc(18% + 34px) 0, 100% 0, 100% 100%, 0 100%);
+  }
+  .notch-quote {
+    clip-path: polygon(
+      0 42px, 9% 42px, calc(9% + 40px) 0, 100% 0,
+      100% calc(100% - 46px), calc(100% - 128px) calc(100% - 46px),
+      calc(100% - 150px) 100%, 0 100%
+    );
+  }
+
+  /* Dot matrix texture used on the yellow cards */
+  .dot-grid {
+    background-image: radial-gradient(rgb(0 0 0 / 0.09) 1px, transparent 1.2px);
+    background-size: 14px 14px;
+  }
+  .dot-grid-light {
+    background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1.2px);
+    background-size: 16px 16px;
+  }
+
+  /* Thin architectural hairlines laid over hero imagery */
+  .hairlines {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.10) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.08) 1px, transparent 1px);
+    background-size: 44% 100%, 100% 62%;
+    background-position: 44% 0, 0 62%;
+    background-repeat: no-repeat;
+  }
+
+  /* List rows (navigation, feature lists): underline grows on hover */
+  .rail-row {
+    @apply relative;
+  }
+  .rail-row::after {
+    content: "";
+    @apply absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-white transition-transform duration-500 ease-[cubic-bezier(.2,.7,.1,1)];
+  }
+  .rail-row:hover::after,
+  .rail-row[data-active="true"]::after {
+    @apply scale-x-100;
+  }
+
+  /* Label / value rows inside dark spec cards */
+  .spec-row {
+    @apply flex items-center justify-between gap-4 border-b border-white/[0.08] py-3 text-sm last:border-b-0;
+  }
+  .spec-row > :first-child {
+    @apply text-slate-400;
+  }
+  .spec-row > :last-child {
+    @apply text-right font-medium text-white;
+  }
+
+  /* Underline-only form field (white contact card) */
+  .field-line {
+    @apply w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-neutral-900 outline-none transition-colors placeholder:text-neutral-500 focus:border-black;
+  }
+}
+
+/* ---------- Motion ---------- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(110%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes wipe {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  45% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  55% {
+    transform: scaleX(1);
+    transform-origin: right;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+}
+@keyframes curtain {
+  0%,
+  70% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+.animate-rise {
+  animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.1, 1) both;
+}
+.animate-wipe {
+  animation: wipe 1.4s cubic-bezier(0.7, 0, 0.3, 1) both;
+}
+.animate-curtain {
+  animation: curtain 2s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-wipe,
+  .animate-curtain {
+    animation-duration: 1ms !important;
+  }
+  .rail-row::after {
+    transition: none;
+  }
+}
+
+/* ---------- Scrollbars ---------- */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 10px;
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.2); 
+  background: rgb(255 255 255 / 0.14);
   border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.5); 
+  background: rgb(247 207 73 / 0.6);
 }
-
-/* For Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(16, 185, 129, 0.2) rgba(255, 255, 255, 0.02);
+  scrollbar-color: rgb(255 255 255 / 0.14) transparent;
 }

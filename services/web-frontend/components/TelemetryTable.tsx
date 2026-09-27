@@ -37,12 +37,12 @@ export default function TelemetryTable({ data }: TelemetryTableProps) {
   }
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+      <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
         <div>
-          <CardTitle className="text-base">Recent Telemetry</CardTitle>
+          <CardTitle className="text-xl font-normal tracking-[-0.02em]">Recent Telemetry</CardTitle>
           <CardDescription>Latest {rows.length} readings</CardDescription>
         </div>
-        <Button variant="outline" size="sm" onClick={handleExport}>Export CSV</Button>
+        <Button variant="light" size="sm" onClick={handleExport}>Export CSV</Button>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <Table>
@@ -65,7 +65,7 @@ export default function TelemetryTable({ data }: TelemetryTableProps) {
                 <TableCell className="text-right">{(row as any).humidity != null ? Number((row as any).humidity).toFixed(2) : ''}</TableCell>
                 <TableCell className="text-right">{Math.max(0, Math.min(100, Math.round((row.score || 0) * 100)))}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs ${row.status === 'ANOMALY' ? 'bg-red-500/10 text-red-400 border border-red-500/30' : row.status === 'WARNING' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'}`}>{row.status}</span>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium tracking-wide border ${row.status === 'ANOMALY' ? 'bg-red-500/10 text-red-400 border-red-500/30' : row.status === 'WARNING' ? 'bg-amber-500/10 text-amber-300 border-amber-500/30' : 'bg-white/[0.04] text-slate-300 border-white/10'}`}><span className={`size-1.5 rounded-full ${row.status === 'ANOMALY' ? 'bg-red-400' : row.status === 'WARNING' ? 'bg-amber-300' : 'bg-green-400'}`} />{row.status}</span>
                 </TableCell>
               </TableRow>
             ))}
