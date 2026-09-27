@@ -1,6 +1,15 @@
 # BuildKit enabled by default in Docker 23+
 # For older versions: DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1
 
+# This network blocks outbound UDP/53, so the public resolvers configured in
+# daemon.json (8.8.8.8 / 1.1.1.1) are unreachable from containers. Point every
+# service at the LAN router resolver instead.
+# NOTE: this covers container RUNTIME only. Docker *builds* resolve DNS from the
+# daemon config, so the apk/apt-get steps in the Dockerfiles still need
+# daemon.json fixed (see %USERPROFILE%\.docker\daemon.json).
+x-dns: &dns
+  - 192.168.1.1
+
 services:
   # ==========================================
   # INFRASTRUCTURE LAYER
@@ -15,6 +24,7 @@ services:
       - "9001:9001"
     volumes:
       - ./infrastructure/mosquitto/config:/mosquitto/config
+    dns: *dns
     networks:
       - iiot_net
     restart: unless-stopped
@@ -39,6 +49,7 @@ services:
     volumes:
       - ./infrastructure/influxdb/data:/var/lib/influxdb
       - ./infrastructure/influxdb/config:/etc/influxdb
+    dns: *dns
     networks:
       - iiot_net
     restart: unless-stopped
@@ -61,6 +72,7 @@ services:
       - POSTGRES_PASSWORD=iiot_db_pass_123
     volumes:
       - ./infrastructure/postgres/data:/var/lib/postgresql/data
+    dns: *dns
     networks:
       - iiot_net
     restart: unless-stopped
@@ -91,6 +103,7 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - ./services/auth-service/src:/app/src
+    dns: *dns
     networks:
       - iiot_net
     depends_on:
@@ -132,6 +145,7 @@ services:
       - ./services/ai-engine/src:/app/src
       - ./services/ai-engine/models:/app/models
       - ./services/ai-engine/data:/app/data
+    dns: *dns
     networks:
       - iiot_net
     depends_on:
@@ -163,6 +177,7 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - ./services/simulator:/app
+    dns: *dns
     networks:
       - iiot_net
     depends_on:
@@ -187,6 +202,7 @@ services:
       - NEXT_PUBLIC_AUTH_URL=http://localhost:8001
       - AI_ENGINE_URL=http://ai-engine:8000
       - AUTH_SERVICE_URL=http://auth-service:8001
+    dns: *dns
     networks:
       - iiot_net
     depends_on:

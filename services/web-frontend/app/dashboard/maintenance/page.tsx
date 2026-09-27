@@ -45,6 +45,7 @@ type Task = {
   completionNotes: string | null
   completedAt: string | null
   anomalyId: string | null
+  aiDetectedCause: string | null
   createdAt: string
   urgency?: 'URGENT' | 'NOT_URGENT'
   importance?: 'IMPORTANT' | 'NOT_IMPORTANT'
